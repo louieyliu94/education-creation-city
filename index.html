@@ -3,100 +3,81 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Growing Tree — Project Explorer</title>
+<title>The River — Project Explorer</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  background: #f0ead8;
+  background: #ccd0d6;
   font-family: Georgia, serif;
   overflow: hidden;
-  height: 100vh;
-  width: 100vw;
+  height: 100vh; width: 100vw;
 }
 
 #explorer { position: relative; width: 100vw; height: 100vh; }
 
-#tree-svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+#river-svg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
 }
 
-/* ── Project cards ─────────────────────────── */
-.project-card {
-  width: 120px;
-  height: 160px;
-  cursor: pointer;
-  background: #fff;
-  transition: filter 0.38s ease, transform 0.38s cubic-bezier(0.34,1.56,0.64,1);
-}
-
-.project-card[data-id="1"] {
-  clip-path: path('M 55,8 C 86,-4 124,14 126,58 C 128,102 106,154 66,164 C 26,174 -6,144 2,90 C 10,36 24,20 55,8 Z');
-}
-.project-card[data-id="2"] {
-  clip-path: path('M 64,4 C 94,-6 124,20 120,70 C 116,120 88,160 52,162 C 16,164 -8,120 0,68 C 8,16 34,14 64,4 Z');
-}
-.project-card[data-id="3"] {
-  clip-path: path('M 58,6 C 96,0 124,32 120,76 C 116,120 86,160 54,160 C 22,160 -2,112 4,62 C 10,12 20,12 58,6 Z');
-}
-.project-card[data-id="4"] {
-  clip-path: path('M 50,4 C 78,-8 116,12 120,58 C 124,104 108,156 62,166 C 16,176 -8,136 0,82 C 8,28 22,16 50,4 Z');
-}
-.project-card[data-id="5"] {
-  clip-path: path('M 66,6 C 98,-4 126,26 122,74 C 118,122 88,160 50,160 C 12,160 -8,108 0,58 C 8,8 34,16 66,6 Z');
-}
-
-.project-card:hover {
-  filter: brightness(1.12)
-          drop-shadow(0 0 10px rgba(255,218,58,1))
-          drop-shadow(0 0 28px rgba(255,192,28,0.82))
-          drop-shadow(0 0 60px rgba(255,158,0,0.46));
-  transform: scale(1.1) translateY(-5px);
-}
-
-/* stem-glow paths toggled by JS */
-.stem-glow {
-  opacity: 0;
-  transition: opacity 0.38s ease;
-  pointer-events: none;
-}
-
-/* branch idle pulse */
-.bgl {
-  pointer-events: none;
-  animation: branchPulse 4.2s ease-in-out infinite;
-}
-@keyframes branchPulse {
-  0%, 100% { opacity: 0; }
-  50%       { opacity: 0.13; }
-}
-
-/* ── Centered modal ────────────────────────── */
-#modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(255,252,244,0.60);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  z-index: 300;
+/* ── Card flip ─────────────────────────────── */
+.card-fo-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0;
-  pointer-events: none;
+}
+.card-wrap {
+  width: 88px; height: 118px;
+  perspective: 720px;
+}
+.card-inner {
+  width: 100%; height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.54s cubic-bezier(0.4,0,0.2,1);
+  cursor: pointer;
+}
+.card-inner.revealed {
+  transform: rotateY(180deg);
+}
+.card-face {
+  position: absolute; inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.card-back svg,
+.card-front svg { width: 100%; height: 100%; display: block; }
+.card-front { transform: rotateY(180deg); }
+
+.card-inner.revealed {
+  filter: drop-shadow(0 2px 8px rgba(10,20,40,0.22));
+}
+.card-inner.revealed:hover {
+  filter: drop-shadow(0 0 9px rgba(255,204,40,0.9))
+          drop-shadow(0 0 26px rgba(255,170,20,0.55));
+}
+
+/* ── Modal ─────────────────────────────────── */
+#modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(190,200,212,0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 300;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
   transition: opacity 0.32s ease;
 }
-#modal-overlay.open {
-  opacity: 1;
-  pointer-events: auto;
-}
+#modal-overlay.open { opacity: 1; pointer-events: auto; }
+
 #modal-card {
-  background: rgba(252,250,243,0.94);
-  border: 1px solid rgba(200,188,165,0.5);
+  background: rgba(246,244,240,0.96);
+  border: 1px solid rgba(170,164,148,0.5);
   border-radius: 6px;
-  box-shadow: 0 20px 60px rgba(40,30,10,0.18), 0 4px 16px rgba(40,30,10,0.10);
+  box-shadow: 0 22px 64px rgba(10,18,30,0.22);
   width: min(500px, 88vw);
   max-height: 88vh;
   overflow-y: auto;
@@ -109,24 +90,24 @@ body {
 
 .modal-close {
   position: absolute; top: 14px; right: 16px;
-  background: none; border: none;
-  font-size: 18px; cursor: pointer; color: #b0a898;
+  background: none; border: none; font-size: 18px;
+  cursor: pointer; color: #9ea8b2;
   padding: 6px 10px; border-radius: 50%;
   transition: color 0.2s, background 0.2s; line-height: 1;
 }
-.modal-close:hover { color: #333; background: #ede8d8; }
+.modal-close:hover { color: #222; background: #e4e0d8; }
 
 #modal-cover-wrap {
   width: 100%; border-radius: 4px; overflow: hidden;
   margin-bottom: 26px;
-  box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
   aspect-ratio: 3/4;
 }
 #modal-cover-wrap svg { width: 100%; height: 100%; display: block; }
 
 #modal-title {
   font-size: 24px; font-weight: normal; color: #181818;
-  margin-bottom: 9px; letter-spacing: 0.2px; line-height: 1.3;
+  margin-bottom: 9px; line-height: 1.3;
 }
 .modal-tag {
   display: inline-block; font-size: 10px;
@@ -139,38 +120,38 @@ body {
 
 .explore-btn {
   display: inline-block; padding: 11px 28px;
-  border: 1.5px solid #3d5a3e; color: #3d5a3e;
+  border: 1.5px solid #2840a0; color: #2840a0;
   background: none; border-radius: 2px;
   font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
   cursor: pointer; font-family: 'Helvetica Neue', Arial, sans-serif;
   transition: background 0.2s, color 0.2s;
 }
-.explore-btn:hover { background: #3d5a3e; color: #f0eedf; }
+.explore-btn:hover { background: #2840a0; color: #f0eedf; }
 
-/* ── Page chrome ───────────────────────────── */
+/* ── Page chrome ────────────────────────────── */
 #page-label {
   position: fixed; top: 28px; left: 36px;
   z-index: 100; pointer-events: none;
 }
 #page-label h1 {
   font-size: 11px; letter-spacing: 3.5px; text-transform: uppercase;
-  color: #9a8e7c; font-weight: normal;
+  color: #7080a0; font-weight: normal;
   font-family: 'Helvetica Neue', Arial, sans-serif;
 }
 #page-label p {
-  font-size: 10px; color: #c0b8a8; letter-spacing: 0.8px; margin-top: 5px;
+  font-size: 10px; color: #90a0b4; letter-spacing: 0.8px; margin-top: 5px;
   font-family: 'Helvetica Neue', Arial, sans-serif;
 }
 #hint {
   position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
-  font-size: 10px; letter-spacing: 2.5px; color: #c0b8a8; text-transform: uppercase;
+  font-size: 10px; letter-spacing: 2.5px; color: #90a0b4; text-transform: uppercase;
   font-family: 'Helvetica Neue', Arial, sans-serif; pointer-events: none;
-  animation: fadeOut 1.2s ease 4.5s forwards;
+  animation: fadeOut 1.2s ease 5s forwards;
 }
 @keyframes fadeOut { to { opacity: 0; } }
 #project-count {
   position: fixed; bottom: 28px; right: 36px;
-  font-size: 10px; letter-spacing: 1.5px; color: #b8ae9c;
+  font-size: 10px; letter-spacing: 1.5px; color: #90a0b4;
   font-family: 'Helvetica Neue', Arial, sans-serif; pointer-events: none;
 }
 </style>
@@ -178,388 +159,98 @@ body {
 <body>
 
 <div id="page-label">
-  <h1>The Growing Tree</h1>
-  <p>A living map of projects</p>
+  <h1>The River</h1>
+  <p>A living body of work</p>
 </div>
-<div id="hint">Hover to illuminate · Click to explore</div>
+<div id="hint">Hover to reveal · Click to explore</div>
 <div id="project-count"></div>
 
 <div id="explorer">
-<svg id="tree-svg" viewBox="0 0 1400 900" preserveAspectRatio="xMidYMid meet"
+<svg id="river-svg" viewBox="0 0 1400 900" preserveAspectRatio="xMidYMid meet"
      xmlns="http://www.w3.org/2000/svg">
 <defs>
-  <filter id="blur-xl"><feGaussianBlur stdDeviation="14"/></filter>
-  <filter id="blur-lg"><feGaussianBlur stdDeviation="8"/></filter>
-  <filter id="blur-md"><feGaussianBlur stdDeviation="4"/></filter>
+  <filter id="blur-xl"><feGaussianBlur stdDeviation="18"/></filter>
+  <filter id="blur-lg"><feGaussianBlur stdDeviation="10"/></filter>
+  <filter id="blur-md"><feGaussianBlur stdDeviation="5"/></filter>
+  <filter id="blur-sm"><feGaussianBlur stdDeviation="2.5"/></filter>
 
-  <filter id="stem-glow-f" x="-30%" y="-30%" width="160%" height="160%">
-    <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="b"/>
-    <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-  </filter>
+  <!-- Warm dawn glow at top-right -->
+  <radialGradient id="dawn-glow" cx="88%" cy="8%" r="48%">
+    <stop offset="0%"  stop-color="#e0d0a4" stop-opacity="0.42"/>
+    <stop offset="60%" stop-color="#d4d0c0" stop-opacity="0.14"/>
+    <stop offset="100%" stop-color="#ccd0d6" stop-opacity="0"/>
+  </radialGradient>
 
-  <filter id="bpf" x="-20%" y="-20%" width="140%" height="140%">
-    <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"/>
-    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-  </filter>
+  <!-- Source mist at bottom-left -->
+  <radialGradient id="source-mist" cx="6%" cy="98%" r="42%">
+    <stop offset="0%"  stop-color="#b4c0d0" stop-opacity="0.36"/>
+    <stop offset="100%" stop-color="#ccd0d6" stop-opacity="0"/>
+  </radialGradient>
 
-  <filter id="leaf-glow" x="-80%" y="-80%" width="260%" height="260%">
-    <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="b"/>
-    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-  </filter>
-
-  <!-- Golden sky — Ten Suns warmth -->
-  <linearGradient id="sky-grad" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0%"   stop-color="#ffd84a" stop-opacity="0.68"/>
-    <stop offset="9%"   stop-color="#ffe878" stop-opacity="0.48"/>
-    <stop offset="20%"  stop-color="#f8eecc" stop-opacity="0.28"/>
-    <stop offset="34%"  stop-color="#f4ecd8" stop-opacity="0.06"/>
-    <stop offset="44%"  stop-color="#f0ead8" stop-opacity="0"/>
-  </linearGradient>
-
-  <!-- Ground darkening -->
-  <linearGradient id="gnd-grad" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0%"   stop-color="#a89060" stop-opacity="0"/>
-    <stop offset="55%"  stop-color="#907850" stop-opacity="0.10"/>
-    <stop offset="100%" stop-color="#786040" stop-opacity="0.22"/>
-  </linearGradient>
+  <!-- Mid-river atmosphere -->
+  <radialGradient id="mid-mist" cx="50%" cy="52%" r="40%">
+    <stop offset="0%"  stop-color="#b8bcd0" stop-opacity="0.12"/>
+    <stop offset="100%" stop-color="#ccd0d6" stop-opacity="0"/>
+  </radialGradient>
 </defs>
 
-<!-- base fill -->
-<rect width="1400" height="900" fill="#f0ead8"/>
+<!-- ── Background ── -->
+<rect width="1400" height="900" fill="#ccd0d6"/>
+<rect width="1400" height="900" fill="url(#dawn-glow)"/>
+<rect width="1400" height="900" fill="url(#source-mist)"/>
+<rect width="1400" height="900" fill="url(#mid-mist)"/>
 
-<!-- ══ CANOPY BLOBS ══ -->
-<ellipse cx="580" cy="455" rx="110" ry="78"  fill="#8aab80" opacity="0.22" filter="url(#blur-xl)"/>
-<ellipse cx="820" cy="438" rx="105" ry="72"  fill="#789a78" opacity="0.20" filter="url(#blur-xl)"/>
-<ellipse cx="480" cy="490" rx="82"  ry="60"  fill="#6a8a70" opacity="0.18" filter="url(#blur-lg)"/>
-<ellipse cx="920" cy="470" rx="90"  ry="65"  fill="#7a9a80" opacity="0.18" filter="url(#blur-lg)"/>
-<ellipse cx="320" cy="310" rx="130" ry="95"  fill="#8aab80" opacity="0.24" filter="url(#blur-xl)"/>
-<ellipse cx="240" cy="268" rx="95"  ry="72"  fill="#6a9270" opacity="0.22" filter="url(#blur-lg)"/>
-<ellipse cx="420" cy="290" rx="105" ry="78"  fill="#7aaa78" opacity="0.22" filter="url(#blur-xl)"/>
-<ellipse cx="178" cy="305" rx="72"  ry="55"  fill="#789898" opacity="0.18" filter="url(#blur-lg)"/>
-<ellipse cx="1080" cy="308" rx="128" ry="92" fill="#8aab80" opacity="0.24" filter="url(#blur-xl)"/>
-<ellipse cx="1185" cy="278" rx="98"  ry="72" fill="#6a9a78" opacity="0.22" filter="url(#blur-lg)"/>
-<ellipse cx="972"  cy="305" rx="100" ry="76" fill="#7aaa80" opacity="0.22" filter="url(#blur-xl)"/>
-<ellipse cx="1285" cy="302" rx="80"  ry="60" fill="#789898" opacity="0.18" filter="url(#blur-lg)"/>
-<ellipse cx="155" cy="188" rx="118" ry="88"  fill="#a0c090" opacity="0.26" filter="url(#blur-xl)"/>
-<ellipse cx="108" cy="235" rx="80"  ry="62"  fill="#7a9a88" opacity="0.20" filter="url(#blur-lg)"/>
-<ellipse cx="255" cy="168" rx="98"  ry="75"  fill="#90b888" opacity="0.24" filter="url(#blur-lg)"/>
-<ellipse cx="500" cy="178" rx="115" ry="85"  fill="#9ac090" opacity="0.24" filter="url(#blur-xl)"/>
-<ellipse cx="415" cy="208" rx="85"  ry="65"  fill="#6a9268" opacity="0.20" filter="url(#blur-lg)"/>
-<ellipse cx="660" cy="152" rx="125" ry="95"  fill="#a0c888" opacity="0.28" filter="url(#blur-xl)"/>
-<ellipse cx="720" cy="128" rx="95"  ry="72"  fill="#c0d8a8" opacity="0.20" filter="url(#blur-lg)"/>
-<ellipse cx="558" cy="168" rx="85"  ry="65"  fill="#88b878" opacity="0.24" filter="url(#blur-lg)"/>
-<ellipse cx="990" cy="178" rx="120" ry="90"  fill="#98c098" opacity="0.26" filter="url(#blur-xl)"/>
-<ellipse cx="1075" cy="152" rx="90" ry="68"  fill="#7aa888" opacity="0.22" filter="url(#blur-lg)"/>
-<ellipse cx="1175" cy="188" rx="105" ry="80" fill="#a0c8a8" opacity="0.24" filter="url(#blur-lg)"/>
-<ellipse cx="1285" cy="195" rx="112" ry="85" fill="#8ab898" opacity="0.24" filter="url(#blur-xl)"/>
-<ellipse cx="1345" cy="232" rx="78"  ry="60" fill="#80a890" opacity="0.20" filter="url(#blur-lg)"/>
-<ellipse cx="148"  cy="255" rx="82"  ry="58" fill="#7898c0" opacity="0.16" filter="url(#blur-lg)"/>
-<ellipse cx="382"  cy="198" rx="68"  ry="52" fill="#6888b0" opacity="0.15" filter="url(#blur-lg)"/>
-<ellipse cx="768"  cy="140" rx="88"  ry="66" fill="#8aaec0" opacity="0.18" filter="url(#blur-lg)"/>
-<ellipse cx="1268" cy="245" rx="88"  ry="66" fill="#6888a8" opacity="0.16" filter="url(#blur-lg)"/>
-<ellipse cx="348"  cy="325" rx="42"  ry="32" fill="#c8a858" opacity="0.16" filter="url(#blur-md)"/>
-<ellipse cx="888"  cy="212" rx="38"  ry="28" fill="#b89848" opacity="0.16" filter="url(#blur-md)"/>
-<ellipse cx="1115" cy="318" rx="44"  ry="34" fill="#c8a858" opacity="0.14" filter="url(#blur-md)"/>
-<ellipse cx="505"  cy="195" rx="60"  ry="44" fill="#b8a0b0" opacity="0.13" filter="url(#blur-md)"/>
+<!-- ── Atmospheric mist blobs ── -->
+<ellipse cx="90"  cy="840" rx="220" ry="130" fill="#b0bece" opacity="0.22" filter="url(#blur-xl)"/>
+<ellipse cx="60"  cy="780" rx="160" ry="90"  fill="#b8c6d4" opacity="0.16" filter="url(#blur-lg)"/>
+<ellipse cx="280" cy="700" rx="170" ry="95"  fill="#aebccc" opacity="0.14" filter="url(#blur-xl)"/>
+<ellipse cx="500" cy="560" rx="155" ry="88"  fill="#abb8cc" opacity="0.12" filter="url(#blur-lg)"/>
+<ellipse cx="720" cy="410" rx="160" ry="90"  fill="#a8b5cb" opacity="0.12" filter="url(#blur-xl)"/>
+<ellipse cx="960" cy="258" rx="165" ry="92"  fill="#acb8cc" opacity="0.13" filter="url(#blur-lg)"/>
+<ellipse cx="1190" cy="118" rx="175" ry="98" fill="#b4bec8" opacity="0.14" filter="url(#blur-xl)"/>
+<!-- Lavender mist touches -->
+<ellipse cx="380" cy="648" rx="100" ry="58"  fill="#b0a8d0" opacity="0.10" filter="url(#blur-lg)"/>
+<ellipse cx="830" cy="352" rx="110" ry="62"  fill="#b0a8d0" opacity="0.09" filter="url(#blur-lg)"/>
+<ellipse cx="1080" cy="195" rx="105" ry="60" fill="#b2aad2" opacity="0.10" filter="url(#blur-lg)"/>
+<!-- Warm glow top-right -->
+<ellipse cx="1360" cy="50"  rx="130" ry="75" fill="#d8c898" opacity="0.24" filter="url(#blur-xl)"/>
+<ellipse cx="1310" cy="80"  rx="95"  ry="55" fill="#d0c090" opacity="0.18" filter="url(#blur-lg)"/>
 
-<!-- ══ LEAF SILHOUETTES ══ -->
-<path d="M 202,302 Q 166,255 185,214 Q 210,200 225,236 Q 240,270 215,298 Z" fill="#6a9068" opacity="0.50"/>
-<path d="M 154,264 Q 120,220 140,184 Q 165,172 177,210 Q 188,246 162,261 Z" fill="#508068" opacity="0.44"/>
-<path d="M 280,200 Q 257,152 292,128 Q 322,122 330,160 Q 336,196 303,202 Z" fill="#78aa80" opacity="0.48"/>
-<path d="M 130,320 Q  94,284 107,250 Q 129,235 147,262 Q 161,285 147,315 Z" fill="#5a8468" opacity="0.42"/>
-<path d="M 350,190 Q 330,148 365,125 Q 394,118 399,156 Q 403,190 367,193 Z" fill="#80a878" opacity="0.44"/>
-<path d="M 240,250 Q 210,215 228,184 Q 254,174 262,207 Q 270,238 245,251 Z" fill="#3a6050" opacity="0.38"/>
-<path d="M 370,155 Q 357,118 389,104 Q 413,101 416,129 Q 418,154 393,158 Z" fill="#2c5040" opacity="0.36"/>
-<path d="M 176,216 Q 158,186 172,162 Q 191,155 199,180 Q 204,206 183,216 Z" fill="#3a6858" opacity="0.36"/>
-<path d="M 1020,250 Q 1054,208 1088,218 Q 1111,240 1093,268 Q 1076,292 1047,274 Z" fill="#70a080" opacity="0.48"/>
-<path d="M 1110,185 Q 1142,147 1173,161 Q 1191,187 1166,209 Q 1141,226 1117,207 Z" fill="#508878" opacity="0.44"/>
-<path d="M  954,209 Q  987,167 1021,181 Q 1039,205 1019,228 Q  999,245  977,227 Z" fill="#78aa80" opacity="0.48"/>
-<path d="M 1180,240 Q 1214,200 1247,218 Q 1261,244 1237,267 Q 1214,285 1191,264 Z" fill="#589070" opacity="0.44"/>
-<path d="M 1260,200 Q 1285,162 1314,178 Q 1329,200 1307,223 Q 1286,239 1266,219 Z" fill="#68aa7e" opacity="0.38"/>
-<path d="M 1250,260 Q 1278,224 1308,238 Q 1321,262 1297,282 Q 1274,298 1253,274 Z" fill="#6888a8" opacity="0.34"/>
-<path d="M  600,130 Q  578,88  612,71 Q  642,67  648,101 Q  652,130  620,136 Z" fill="#6a9268" opacity="0.48"/>
-<path d="M  690,105 Q  711,64  744,74 Q  764,95  744,121 Q  725,139  703,121 Z" fill="#5a8860" opacity="0.44"/>
-<path d="M  545,158 Q  514,118  540,96 Q  567,88  577,119 Q  585,147  554,157 Z" fill="#78aa80" opacity="0.48"/>
-<path d="M  650,80  Q  670,44  703,54 Q  721,74  701,97 Q  681,114  659,97 Z"  fill="#4a7858" opacity="0.38"/>
-<path d="M 178,240 Q 148,210 159,179 Q 179,169 191,197 Q 201,224 181,241 Z" fill="#6888a8" opacity="0.34"/>
-<path d="M 144,260 Q 114,228 131,199 Q 154,189 161,219 Q 167,247 147,261 Z" fill="#5878a0" opacity="0.28"/>
+<!-- ── Ultramarine gestural marks — Pootoogook directness ── -->
+<path d="M 130,804 C 162,790 192,782 215,778" stroke="#2840a0" stroke-width="2.5" fill="none" opacity="0.40" stroke-linecap="round"/>
+<path d="M 108,818 C 124,812 140,808 153,806" stroke="#2840a0" stroke-width="1.5" fill="none" opacity="0.30" stroke-linecap="round"/>
+<circle cx="160" cy="796" r="2.5" fill="#2840a0" opacity="0.34"/>
+<circle cx="118" cy="820" r="1.8" fill="#2840a0" opacity="0.26"/>
 
-<!-- ══ BOTANICAL DETAILS ══ -->
-<line x1="250" y1="316" x2="232" y2="285" stroke="#4a5a40" stroke-width="1.5" opacity="0.58"/>
-<circle cx="232" cy="279" r="5"   fill="#1c1c1c" opacity="0.72"/>
-<circle cx="239" cy="269" r="4"   fill="#1c1c1c" opacity="0.62"/>
-<circle cx="247" cy="276" r="3.5" fill="#1c1c1c" opacity="0.56"/>
-<line x1="880" y1="244" x2="886" y2="200" stroke="#a86820" stroke-width="1.5" opacity="0.68"/>
-<line x1="886" y1="200" x2="875" y2="182" stroke="#a86820" stroke-width="1"   opacity="0.58"/>
-<line x1="886" y1="200" x2="899" y2="178" stroke="#a86820" stroke-width="1"   opacity="0.58"/>
-<circle cx="875" cy="177" r="4.5" fill="#b87830" opacity="0.84"/>
-<circle cx="899" cy="173" r="4"   fill="#b87830" opacity="0.78"/>
-<circle cx="888" cy="166" r="3"   fill="#b87830" opacity="0.72"/>
-<path d="M 170,318 C 155,300 140,282 124,270" stroke="#4a6858" stroke-width="2"   fill="none" opacity="0.48" stroke-linecap="round"/>
-<path d="M 170,318 C 153,305 141,297 134,284" stroke="#4a6858" stroke-width="1.5" fill="none" opacity="0.38" stroke-linecap="round"/>
-<path d="M 170,318 C 174,300 171,282 161,268" stroke="#4a6858" stroke-width="1.5" fill="none" opacity="0.38" stroke-linecap="round"/>
-<line x1="1150" y1="278" x2="1168" y2="255" stroke="#6a7a58" stroke-width="1"   opacity="0.45"/>
-<line x1="1168" y1="255" x2="1162" y2="240" stroke="#6a7a58" stroke-width="0.8" opacity="0.38"/>
-<line x1="1168" y1="255" x2="1176" y2="238" stroke="#6a7a58" stroke-width="0.8" opacity="0.38"/>
-<circle cx="1162" cy="237" r="3"   fill="#8a9a60" opacity="0.72"/>
-<circle cx="1176" cy="235" r="2.5" fill="#8a9a60" opacity="0.66"/>
+<path d="M 390,648 C 418,636 448,630 470,626" stroke="#3050b8" stroke-width="2.2" fill="none" opacity="0.36" stroke-linecap="round"/>
+<circle cx="410" cy="644" r="2" fill="#2840a0" opacity="0.30"/>
 
-<!-- ══ TRUNK ══ -->
-<path d="M 700,905 C 698,840 694,775 690,715 C 686,655 690,608 696,566 C 700,535 700,500 700,482"
-      stroke="#222020" stroke-width="36" fill="none" stroke-linecap="round" opacity="0.90"/>
-<path d="M 700,905 C 703,840 707,775 711,715 C 715,655 711,608 705,566 C 701,535 701,500 700,482"
-      stroke="#3c3838" stroke-width="18" fill="none" stroke-linecap="round" opacity="0.36"/>
+<path d="M 610,490 C 634,476 660,470 680,468" stroke="#2840a0" stroke-width="2.2" fill="none" opacity="0.38" stroke-linecap="round"/>
+<path d="M 598,500 C 612,496 626,493 638,492" stroke="#3050b8" stroke-width="1.4" fill="none" opacity="0.28" stroke-linecap="round"/>
+<circle cx="622" cy="488" r="2" fill="#2840a0" opacity="0.30"/>
 
-<!-- ══ MAIN BRANCHES ══ -->
-<path id="branch-1" d="M 700,490 C 620,462 525,428 432,388 C 339,348 255,302 196,258 C 158,226 136,202 120,180"
-      stroke="#2a2420" stroke-width="22" fill="none" stroke-linecap="round" opacity="0.86"/>
-<path d="M 700,490 C 622,460 527,425 434,385 C 341,345 257,299 198,255 C 160,223 138,199 122,177"
-      stroke="#3c3838" stroke-width="11" fill="none" stroke-linecap="round" opacity="0.35"/>
-<path id="branch-2" d="M 700,480 C 676,454 648,420 616,386 C 584,352 553,314 526,276 C 507,246 494,208 490,168"
-      stroke="#2a2420" stroke-width="16" fill="none" stroke-linecap="round" opacity="0.82"/>
-<path id="branch-3" d="M 700,470 C 691,440 678,405 668,368 C 658,332 651,293 649,254 C 647,220 648,190 650,165"
-      stroke="#2a2420" stroke-width="17" fill="none" stroke-linecap="round" opacity="0.83"/>
-<path id="branch-4" d="M 700,480 C 732,455 772,422 814,386 C 856,350 898,309 938,270 C 966,240 990,206 1010,168"
-      stroke="#2a2420" stroke-width="16" fill="none" stroke-linecap="round" opacity="0.82"/>
-<path id="branch-5" d="M 700,490 C 772,460 858,424 942,384 C 1026,344 1106,298 1170,254 C 1216,222 1246,200 1270,180"
-      stroke="#2a2420" stroke-width="22" fill="none" stroke-linecap="round" opacity="0.86"/>
-<path d="M 700,490 C 774,458 860,421 944,381 C 1028,341 1108,295 1172,251 C 1218,219 1248,197 1272,177"
-      stroke="#3c3838" stroke-width="11" fill="none" stroke-linecap="round" opacity="0.35"/>
+<path d="M 848,328 C 874,316 902,310 924,308" stroke="#2840a0" stroke-width="2" fill="none" opacity="0.36" stroke-linecap="round"/>
+<circle cx="862" cy="326" r="2.2" fill="#3050b8" opacity="0.28"/>
 
-<!-- ══ BRANCH IDLE PULSE — amber breathing ══ -->
-<path class="bgl" d="M 700,490 C 620,462 525,428 432,388 C 339,348 255,302 196,258 C 158,226 136,202 120,180"
-      stroke="#e8a030" stroke-width="18" fill="none" stroke-linecap="round"
-      filter="url(#bpf)" style="animation-delay:0s"/>
-<path class="bgl" d="M 700,480 C 676,454 648,420 616,386 C 584,352 553,314 526,276 C 507,246 494,208 490,168"
-      stroke="#e8a030" stroke-width="13" fill="none" stroke-linecap="round"
-      filter="url(#bpf)" style="animation-delay:0.84s"/>
-<path class="bgl" d="M 700,470 C 691,440 678,405 668,368 C 658,332 651,293 649,254 C 647,220 648,190 650,165"
-      stroke="#e8a030" stroke-width="14" fill="none" stroke-linecap="round"
-      filter="url(#bpf)" style="animation-delay:1.68s"/>
-<path class="bgl" d="M 700,480 C 732,455 772,422 814,386 C 856,350 898,309 938,270 C 966,240 990,206 1010,168"
-      stroke="#e8a030" stroke-width="13" fill="none" stroke-linecap="round"
-      filter="url(#bpf)" style="animation-delay:2.52s"/>
-<path class="bgl" d="M 700,490 C 772,460 858,424 942,384 C 1026,344 1106,298 1170,254 C 1216,222 1246,200 1270,180"
-      stroke="#e8a030" stroke-width="18" fill="none" stroke-linecap="round"
-      filter="url(#bpf)" style="animation-delay:3.36s"/>
+<path d="M 1076,172 C 1100,160 1128,154 1148,152" stroke="#2840a0" stroke-width="2" fill="none" opacity="0.34" stroke-linecap="round"/>
+<circle cx="1090" cy="170" r="2" fill="#2840a0" opacity="0.28"/>
 
-<!-- ══ SUB-BRANCHES & TWIGS ══ -->
-<path d="M 438,390 C 398,364 348,335 292,310 C 256,293 218,278 185,268"
-      stroke="#2a2420" stroke-width="10" fill="none" stroke-linecap="round" opacity="0.72"/>
-<path d="M 295,312 C 262,290 228,268 198,246 C 178,230 162,214 150,198"
-      stroke="#2a2420" stroke-width="6"  fill="none" stroke-linecap="round" opacity="0.64"/>
-<path d="M 225,274 C 200,255 174,234 152,215" stroke="#2a2420" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.56"/>
-<path d="M 175,235 C 155,218 136,198 124,178" stroke="#2a2420" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.48"/>
-<path d="M 155,225 C 140,205 134,183 136,162" stroke="#2a2420" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.42"/>
-<path d="M 535,282 C 520,255 508,224 506,194 C 504,168 506,146 508,125"
-      stroke="#2a2420" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.66"/>
-<path d="M 522,270 C 534,242 548,208 558,178 C 565,155 566,130 562,108"
-      stroke="#2a2420" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.60"/>
-<path d="M 648,260 C 660,230 676,196 688,162 C 696,138 700,112 698,88"
-      stroke="#2a2420" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.66"/>
-<path d="M 630,225 C 618,196 610,164 608,136 C 607,114 610,92 615,72"
-      stroke="#2a2420" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.58"/>
-<path d="M 885,314 C 910,280 940,246 962,214"
-      stroke="#2a2420" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.66"/>
-<path d="M 975,200 C 990,172 1006,144 1015,118"
-      stroke="#2a2420" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.52"/>
-<path d="M 1062,302 C 1100,276 1140,248 1175,222"
-      stroke="#2a2420" stroke-width="10" fill="none" stroke-linecap="round" opacity="0.72"/>
-<path d="M 1202,215 C 1238,192 1272,166 1298,140" stroke="#2a2420" stroke-width="6"   fill="none" stroke-linecap="round" opacity="0.64"/>
-<path d="M 1248,198 C 1272,174 1296,148 1314,122" stroke="#2a2420" stroke-width="4"   fill="none" stroke-linecap="round" opacity="0.56"/>
-<path d="M 1286,182 C 1305,158 1320,132 1325,108" stroke="#2a2420" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.48"/>
-<path d="M 1318,170 C 1334,148 1348,122 1352,96"  stroke="#2a2420" stroke-width="2"   fill="none" stroke-linecap="round" opacity="0.42"/>
-<path d="M 200,215 C 184,198 168,180 156,160" stroke="#2a2420" stroke-width="2"   fill="none" stroke-linecap="round" opacity="0.45"/>
-<path d="M 146,208 C 132,188 120,166 115,145"  stroke="#2a2420" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.40"/>
-<path d="M 634,150 C 626,126 621,100 622,76"   stroke="#2a2420" stroke-width="2"   fill="none" stroke-linecap="round" opacity="0.50"/>
-<path d="M 976,192 C 990,168 1006,144 1014,118" stroke="#2a2420" stroke-width="2"   fill="none" stroke-linecap="round" opacity="0.45"/>
+<!-- Fine ultramarine scatter marks between islands -->
+<path d="M 318,710 C 332,705 346,702 356,701" stroke="#3050b8" stroke-width="1.2" fill="none" opacity="0.24" stroke-linecap="round"/>
+<circle cx="330" cy="708" r="1.4" fill="#2840a0" opacity="0.22"/>
+<path d="M 556,542 C 568,536 582,532 592,531" stroke="#2840a0" stroke-width="1.3" fill="none" opacity="0.22" stroke-linecap="round"/>
+<path d="M 798,375 C 810,370 824,366 834,365" stroke="#3050b8" stroke-width="1.2" fill="none" opacity="0.22" stroke-linecap="round"/>
+<path d="M 1040,212 C 1052,206 1066,202 1076,201" stroke="#2840a0" stroke-width="1.2" fill="none" opacity="0.22" stroke-linecap="round"/>
 
-<!-- ══ STEM GLOW PATHS (amber, hover-toggled) ══ -->
-<path id="stem-1" class="stem-glow"
-      d="M 700,490 C 620,462 525,428 432,388 C 339,348 255,302 196,258 C 158,226 136,202 120,180"
-      stroke="#ffbc28" stroke-width="12" fill="none" stroke-linecap="round"
-      filter="url(#stem-glow-f)"/>
-<path id="stem-2" class="stem-glow"
-      d="M 700,480 C 676,454 648,420 616,386 C 584,352 553,314 526,276 C 507,246 494,208 490,168"
-      stroke="#ffbc28" stroke-width="10" fill="none" stroke-linecap="round"
-      filter="url(#stem-glow-f)"/>
-<path id="stem-3" class="stem-glow"
-      d="M 700,470 C 691,440 678,405 668,368 C 658,332 651,293 649,254 C 647,220 648,190 650,165"
-      stroke="#ffbc28" stroke-width="10" fill="none" stroke-linecap="round"
-      filter="url(#stem-glow-f)"/>
-<path id="stem-4" class="stem-glow"
-      d="M 700,480 C 732,455 772,422 814,386 C 856,350 898,309 938,270 C 966,240 990,206 1010,168"
-      stroke="#ffbc28" stroke-width="10" fill="none" stroke-linecap="round"
-      filter="url(#stem-glow-f)"/>
-<path id="stem-5" class="stem-glow"
-      d="M 700,490 C 772,460 858,424 942,384 C 1026,344 1106,298 1170,254 C 1216,222 1246,200 1270,180"
-      stroke="#ffbc28" stroke-width="12" fill="none" stroke-linecap="round"
-      filter="url(#stem-glow-f)"/>
-
-<!-- ══ HANGING TENDRILS ══ -->
-<!-- Branch 1 left -->
-<g><animateTransform attributeName="transform" type="translate" values="0,0;2,0;0,0;-2,0;0,0" dur="6.2s" repeatCount="indefinite"/>
-  <path d="M 378,363 C 380,386 377,412 374,430" stroke="#cec4a2" stroke-width="0.9" fill="none" stroke-linecap="round" opacity="0.15"/></g>
-<g><animateTransform attributeName="transform" type="translate" values="0,0;-2,0;0,0;2,0;0,0" dur="7.4s" repeatCount="indefinite"/>
-  <path d="M 318,340 C 314,366 310,394 308,414" stroke="#c4bca8" stroke-width="0.8" fill="none" stroke-linecap="round" opacity="0.13"/></g>
-<g><animateTransform attributeName="transform" type="translate" values="0,0;1.5,0;0,0;-1.5,0;0,0" dur="5.8s" repeatCount="indefinite"/>
-  <path d="M 253,306 C 250,328 248,356 247,376" stroke="#cec4a2" stroke-width="0.9" fill="none" stroke-linecap="round" opacity="0.14"/></g>
-<g><animateTransform attributeName="transform" type="translate" values="0,0;-1.5,0;0,0;1.5,0;0,0" dur="6.8s" repeatCount="indefinite"/>
-  <path d="M 193,263 C 190,283 188,308 187,326" stroke="#c4bca8" stroke-width="0.8" fill="none" stroke-linecap="round" opacity="0.12"/></g>
-
-<!-- Branch 2 center-left -->
-<g><animateTransform attributeName="transform" type="translate" values="0,0;1.8,0;0,0;-1.8,0;0,0" dur="6.6s" repeatCount="indefinite"/>
-  <path d="M 608,370 C 606,393 605,420 604,438" stroke="#cec4a2" stroke-width="0.8" fill="none" stroke-linecap="round" opacity="0.14"/></g>
-<g><animateTransform attributeName="transform" type="translate" values="0,0;-2,0;0,0;2,0;0,0" dur="7.2s" repeatCount="indefinite"/>
-  <path d="M 558,332 C 555,357 553,384 552,403" stroke="#c4bca8" stroke-width="0.9" fill="none" stroke-linecap="round" opacity="0.13"/></g>
-<g><animateTransform attributeName="transform" type="translate" values="0,0;1.5,0;0,0;-1.5,0;0,0" dur="5.6s" repeatCount="indefinite"/>
-  <path d="M 508,294 C 506,317 504,345 503,364" stroke="#cec4a2" stroke-width="0.8" fill="none" stroke-linecap="round" opacity="0.13"/></g>
-
-<!-- Branch 3 center -->
-<g><animateTransform attributeName="transform" type="translate" values="0,0;1.8,0;0,0;-1.8,0;0,0" dur="6.4s" repeatCount="indefinite"/>
-  <path d="M 663,338 C 660,362 658,390 657,410" stroke="#cec4a2" stroke-width="0.8" fill="none" stroke-linecap="round" opacity="0.14"/></g>
-<g><animateTransform attributeName="transform" type="translate" values="0,0;-1.6,0;0,0;1.6,0;0,0" dur="7.0s" repeatCount="indefinite"/>
-  <path d="M 648,288 C 645,313 644,342 643,360" stroke="#c4bca8" stroke-width="0.9" fill="none" stroke-linecap="round" opacity="0.13"/></g>
-
-<!-- Branch 4 center-right -->
-<g><animateTransform attributeName="transform" type="translate" values="0,0;-1.8,0;0,0;1.8,0;0,0" dur="6.6s" repeatCount="indefinite"/>
-  <path d="M 792,372 C 795,396 797,424 798,442" stroke="#cec4a2" stroke-width="0.8" fill="none" stroke-linecap="round" opacity="0.14"/></g>
-<g><animateTransform attributeName="transform" type="translate" values="0,0;2,0;0,0;-2,0;0,0" dur="7.4s" repeatCount="indefinite"/>
-  <path d="M 842,334 C 845,360 847,388 848,406" stroke="#c4bca8" stroke-width="0.9" fill="none" stroke-linecap="round" opacity="0.13"/></g>
-<g><animateTransform attributeName="transform" type="translate" values="0,0;-1.5,0;0,0;1.5,0;0,0" dur="5.8s" repeatCount="indefinite"/>
-  <path d="M 898,290 C 901,315 904,344 905,362" stroke="#cec4a2" stroke-width="0.8" fill="none" stroke-linecap="round" opacity="0.13"/></g>
-
-<!-- Branch 5 right -->
-<g><animateTransform attributeName="transform" type="translate" values="0,0;2,0;0,0;-2,0;0,0" dur="6.2s" repeatCount="indefinite"/>
-  <path d="M 988,285 C 991,308 994,336 995,354" stroke="#cec4a2" stroke-width="0.9" fill="none" stroke-linecap="round" opacity="0.15"/></g>
-<g><animateTransform attributeName="transform" type="translate" values="0,0;-1.8,0;0,0;1.8,0;0,0" dur="7.2s" repeatCount="indefinite"/>
-  <path d="M 1058,302 C 1061,325 1064,354 1065,372" stroke="#c4bca8" stroke-width="0.8" fill="none" stroke-linecap="round" opacity="0.13"/></g>
-<g><animateTransform attributeName="transform" type="translate" values="0,0;1.6,0;0,0;-1.6,0;0,0" dur="6.8s" repeatCount="indefinite"/>
-  <path d="M 1128,258 C 1131,280 1134,308 1135,326" stroke="#cec4a2" stroke-width="0.9" fill="none" stroke-linecap="round" opacity="0.14"/></g>
-<g><animateTransform attributeName="transform" type="translate" values="0,0;-2,0;0,0;2,0;0,0" dur="5.8s" repeatCount="indefinite"/>
-  <path d="M 1198,252 C 1195,273 1192,299 1191,317" stroke="#c4bca8" stroke-width="0.8" fill="none" stroke-linecap="round" opacity="0.12"/></g>
-
-<!-- ══ SKY GRADIENT (golden) ══ -->
-<rect width="1400" height="900" fill="url(#sky-grad)" pointer-events="none"/>
-
-<!-- ══ GROUND GRADIENT ══ -->
-<rect x="0" y="820" width="1400" height="80" fill="url(#gnd-grad)" pointer-events="none"/>
-
-<!-- ══ FLOATING LEAF PARTICLES ══ -->
-<g filter="url(#leaf-glow)">
-  <ellipse cx="175" cy="340" rx="4" ry="6.5" fill="#ffe050" opacity="0">
-    <animate attributeName="cy" from="340" to="278" dur="5.2s" begin="0s" repeatCount="indefinite"/>
-    <animate attributeName="cx" from="175" to="187" dur="5.2s" begin="0s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0;0.72;0.72;0" dur="5.2s" begin="0s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="235" cy="305" rx="3" ry="5" fill="#ffd040" opacity="0">
-    <animate attributeName="cy" from="305" to="246" dur="6.4s" begin="1.5s" repeatCount="indefinite"/>
-    <animate attributeName="cx" from="235" to="223" dur="6.4s" begin="1.5s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0;0.62;0.62;0" dur="6.4s" begin="1.5s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="158" cy="292" rx="3.5" ry="5.5" fill="#ffe878" opacity="0">
-    <animate attributeName="cy" from="292" to="232" dur="7.1s" begin="3.0s" repeatCount="indefinite"/>
-    <animate attributeName="cx" from="158" to="172" dur="7.1s" begin="3.0s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0;0.65;0.65;0" dur="7.1s" begin="3.0s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="525" cy="309" rx="3.5" ry="5.5" fill="#ffe050" opacity="0">
-    <animate attributeName="cy" from="309" to="248" dur="5.8s" begin="0.7s" repeatCount="indefinite"/>
-    <animate attributeName="cx" from="525" to="513" dur="5.8s" begin="0.7s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0;0.70;0.70;0" dur="5.8s" begin="0.7s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="487" cy="263" rx="3" ry="4.5" fill="#ffd040" opacity="0">
-    <animate attributeName="cy" from="263" to="206" dur="6.6s" begin="2.1s" repeatCount="indefinite"/>
-    <animate attributeName="cx" from="487" to="499" dur="6.6s" begin="2.1s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0;0.60;0.60;0" dur="6.6s" begin="2.1s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="655" cy="292" rx="4" ry="6.5" fill="#ffe878" opacity="0">
-    <animate attributeName="cy" from="292" to="224" dur="6.0s" begin="0.3s" repeatCount="indefinite"/>
-    <animate attributeName="cx" from="655" to="668" dur="6.0s" begin="0.3s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0;0.74;0.74;0" dur="6.0s" begin="0.3s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="638" cy="236" rx="3" ry="5" fill="#ffe050" opacity="0">
-    <animate attributeName="cy" from="236" to="178" dur="7.3s" begin="2.0s" repeatCount="indefinite"/>
-    <animate attributeName="cx" from="638" to="624" dur="7.3s" begin="2.0s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0;0.60;0.60;0" dur="7.3s" begin="2.0s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="698" cy="178" rx="3.5" ry="5.5" fill="#ffd040" opacity="0">
-    <animate attributeName="cy" from="178" to="118" dur="5.5s" begin="3.5s" repeatCount="indefinite"/>
-    <animate attributeName="cx" from="698" to="712" dur="5.5s" begin="3.5s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0;0.64;0.64;0" dur="5.5s" begin="3.5s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="863" cy="304" rx="3.5" ry="5.5" fill="#ffe050" opacity="0">
-    <animate attributeName="cy" from="304" to="242" dur="5.9s" begin="1.1s" repeatCount="indefinite"/>
-    <animate attributeName="cx" from="863" to="875" dur="5.9s" begin="1.1s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0;0.68;0.68;0" dur="5.9s" begin="1.1s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="936" cy="266" rx="3" ry="4.5" fill="#ffe878" opacity="0">
-    <animate attributeName="cy" from="266" to="208" dur="6.7s" begin="2.7s" repeatCount="indefinite"/>
-    <animate attributeName="cx" from="936" to="948" dur="6.7s" begin="2.7s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0;0.62;0.62;0" dur="6.7s" begin="2.7s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="1124" cy="296" rx="4" ry="6" fill="#ffe050" opacity="0">
-    <animate attributeName="cy" from="296" to="236" dur="5.4s" begin="0.8s" repeatCount="indefinite"/>
-    <animate attributeName="cx" from="1124" to="1112" dur="5.4s" begin="0.8s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0;0.70;0.70;0" dur="5.4s" begin="0.8s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="1184" cy="268" rx="3.5" ry="5.5" fill="#ffd040" opacity="0">
-    <animate attributeName="cy" from="268" to="208" dur="6.3s" begin="2.0s" repeatCount="indefinite"/>
-    <animate attributeName="cx" from="1184" to="1198" dur="6.3s" begin="2.0s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0;0.64;0.64;0" dur="6.3s" begin="2.0s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="1236" cy="247" rx="3" ry="5" fill="#ffe878" opacity="0">
-    <animate attributeName="cy" from="247" to="190" dur="7.0s" begin="3.4s" repeatCount="indefinite"/>
-    <animate attributeName="cx" from="1236" to="1224" dur="7.0s" begin="3.4s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0;0.58;0.58;0" dur="7.0s" begin="3.4s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="1284" cy="224" rx="4" ry="6" fill="#ffe050" opacity="0">
-    <animate attributeName="cy" from="224" to="164" dur="5.6s" begin="1.3s" repeatCount="indefinite"/>
-    <animate attributeName="cx" from="1284" to="1272" dur="5.6s" begin="1.3s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0;0.66;0.66;0" dur="5.6s" begin="1.3s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="128" cy="257" rx="3" ry="4.5" fill="#ffd040" opacity="0">
-    <animate attributeName="cy" from="257" to="200" dur="6.1s" begin="4.0s" repeatCount="indefinite"/>
-    <animate attributeName="cx" from="128" to="140" dur="6.1s" begin="4.0s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0;0.60;0.60;0" dur="6.1s" begin="4.0s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="428" cy="333" rx="3.5" ry="5.5" fill="#ffe878" opacity="0">
-    <animate attributeName="cy" from="333" to="273" dur="6.9s" begin="0.5s" repeatCount="indefinite"/>
-    <animate attributeName="cx" from="428" to="416" dur="6.9s" begin="0.5s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0;0.64;0.64;0" dur="6.9s" begin="0.5s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="768" cy="153" rx="3" ry="5" fill="#ffe050" opacity="0">
-    <animate attributeName="cy" from="153" to="94" dur="5.7s" begin="2.8s" repeatCount="indefinite"/>
-    <animate attributeName="cx" from="768" to="782" dur="5.7s" begin="2.8s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0;0.62;0.62;0" dur="5.7s" begin="2.8s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="1308" cy="263" rx="3" ry="4.5" fill="#ffd040" opacity="0">
-    <animate attributeName="cy" from="263" to="207" dur="6.8s" begin="4.3s" repeatCount="indefinite"/>
-    <animate attributeName="cx" from="1308" to="1296" dur="6.8s" begin="4.3s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0;0.58;0.58;0" dur="6.8s" begin="4.3s" repeatCount="indefinite"/>
-  </ellipse>
-</g>
-
-<!-- ══ PROJECT CARDS ══ -->
-<foreignObject x="60" y="20" width="120" height="160">
-  <div xmlns="http://www.w3.org/1999/xhtml" class="project-card" data-id="1"></div>
-</foreignObject>
-<foreignObject x="430" y="8" width="120" height="160">
-  <div xmlns="http://www.w3.org/1999/xhtml" class="project-card" data-id="2"></div>
-</foreignObject>
-<foreignObject x="590" y="5" width="120" height="160">
-  <div xmlns="http://www.w3.org/1999/xhtml" class="project-card" data-id="3"></div>
-</foreignObject>
-<foreignObject x="950" y="8" width="120" height="160">
-  <div xmlns="http://www.w3.org/1999/xhtml" class="project-card" data-id="4"></div>
-</foreignObject>
-<foreignObject x="1210" y="20" width="120" height="160">
-  <div xmlns="http://www.w3.org/1999/xhtml" class="project-card" data-id="5"></div>
-</foreignObject>
+<!-- Dynamic river, islands and cards injected by JS -->
+<g id="river-layer"></g>
+<g id="island-layer"></g>
+<g id="card-layer"></g>
 
 </svg>
 </div>
 
-<!-- ══ CENTERED MODAL ══ -->
+<!-- ── Modal ── -->
 <div id="modal-overlay">
   <div id="modal-card">
     <button class="modal-close" id="modal-close">&#x2715;</button>
@@ -573,9 +264,17 @@ body {
 </div>
 
 <script>
+const SVG_NS   = 'http://www.w3.org/2000/svg';
+const XHTML_NS = 'http://www.w3.org/1999/xhtml';
+
+/* ── River source / destination ─────────────────────────── */
+const SRC  = { x: 28,   y: 912 };
+const DEST = { x: 1384, y: 10  };
+
+/* ── Projects — ix,iy = island centre ───────────────────── */
 const PROJECTS = [
   {
-    id: 1,
+    id: 1, ix: 215, iy: 772,
     title: "Echoes of Memory",
     tag: "Memory & Identity",
     tagBg: "#ddeedd", tagFg: "#2a5a32",
@@ -583,38 +282,28 @@ const PROJECTS = [
     body: "What remains of us when we are gone? This project investigates the fragile architecture of memory through AI systems that learn from personal archives, letters, and photographs.",
     makeCover(w, h) {
       return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <radialGradient id="c1bg" cx="50%" cy="46%" r="55%">
-            <stop offset="0%" stop-color="#c8dfc0"/>
-            <stop offset="100%" stop-color="#4e7860"/>
-          </radialGradient>
-        </defs>
-        <rect width="${w}" height="${h}" fill="url(#c1bg)"/>
-        <ellipse cx="${w*.5}" cy="${h*.46}" rx="${w*.42}" ry="${h*.44}" fill="#3e5e4e" opacity="0.22"/>
-        <circle cx="${w*.5}" cy="${h*.46}" r="${w*.48}" fill="none" stroke="#d8ecca" stroke-width="0.7" opacity="0.28"/>
-        <circle cx="${w*.5}" cy="${h*.46}" r="${w*.38}" fill="none" stroke="#d8ecca" stroke-width="0.9" opacity="0.24"/>
-        <circle cx="${w*.5}" cy="${h*.46}" r="${w*.28}" fill="none" stroke="#d8ecca" stroke-width="1.0" opacity="0.32"/>
-        <circle cx="${w*.5}" cy="${h*.46}" r="${w*.18}" fill="none" stroke="#d8ecca" stroke-width="1.1" opacity="0.38"/>
-        <ellipse cx="${w*.5}" cy="${h*.42}" rx="${w*.27}" ry="${h*.34}" fill="#e2d09a" opacity="0.38"/>
-        <ellipse cx="${w*.5}" cy="${h*.31}" rx="${w*.145}" ry="${w*.145}" fill="#e2d09a" opacity="0.72"/>
-        <path d="M ${w*.37},${h*.42} Q ${w*.36},${h*.62} ${w*.38},${h*.72} L ${w*.62},${h*.72} Q ${w*.64},${h*.62} ${w*.63},${h*.42} Z" fill="#e2d09a" opacity="0.52"/>
+        <defs><radialGradient id="cv1" cx="50%" cy="46%" r="55%">
+          <stop offset="0%" stop-color="#c8dfc0"/><stop offset="100%" stop-color="#4e7860"/>
+        </radialGradient></defs>
+        <rect width="${w}" height="${h}" fill="url(#cv1)"/>
+        <circle cx="${w*.5}" cy="${h*.46}" r="${w*.48}" fill="none" stroke="#d8ecca" stroke-width="0.8" opacity="0.30"/>
+        <circle cx="${w*.5}" cy="${h*.46}" r="${w*.36}" fill="none" stroke="#d8ecca" stroke-width="1.0" opacity="0.26"/>
+        <circle cx="${w*.5}" cy="${h*.46}" r="${w*.24}" fill="none" stroke="#d8ecca" stroke-width="1.1" opacity="0.34"/>
+        <ellipse cx="${w*.5}" cy="${h*.42}" rx="${w*.26}" ry="${h*.33}" fill="#e2d09a" opacity="0.40"/>
+        <ellipse cx="${w*.5}" cy="${h*.31}" rx="${w*.14}" ry="${w*.14}" fill="#e2d09a" opacity="0.74"/>
+        <path d="M ${w*.38},${h*.42} Q ${w*.37},${h*.62} ${w*.39},${h*.72} L ${w*.61},${h*.72} Q ${w*.63},${h*.62} ${w*.62},${h*.42} Z" fill="#e2d09a" opacity="0.54"/>
         <line x1="${w*.26}" y1="${h*.38}" x2="${w*.04}" y2="${h*.27}" stroke="#bcd8a8" stroke-width="1" opacity="0.6"/>
         <line x1="${w*.74}" y1="${h*.38}" x2="${w*.96}" y2="${h*.29}" stroke="#bcd8a8" stroke-width="1" opacity="0.6"/>
-        <line x1="${w*.26}" y1="${h*.46}" x2="${w*.02}" y2="${h*.49}" stroke="#bcd8a8" stroke-width="1" opacity="0.5"/>
-        <line x1="${w*.74}" y1="${h*.46}" x2="${w*.98}" y2="${h*.49}" stroke="#bcd8a8" stroke-width="1" opacity="0.5"/>
-        <line x1="${w*.5}"  y1="${h*.17}" x2="${w*.5}"  y2="${h*.03}" stroke="#bcd8a8" stroke-width="1" opacity="0.6"/>
         <circle cx="${w*.04}" cy="${h*.27}" r="${w*.026}" fill="#bcd8a8" opacity="0.78"/>
-        <circle cx="${w*.02}" cy="${h*.49}" r="${w*.022}" fill="#bcd8a8" opacity="0.68"/>
         <circle cx="${w*.96}" cy="${h*.29}" r="${w*.026}" fill="#bcd8a8" opacity="0.78"/>
-        <circle cx="${w*.98}" cy="${h*.49}" r="${w*.022}" fill="#bcd8a8" opacity="0.68"/>
-        <rect x="0" y="${h*.82}" width="${w}" height="${h*.18}" fill="#3e5e4e" opacity="0.88"/>
-        <text x="${w*.5}" y="${h*.9}"  font-family="Georgia,serif" font-size="${(w*.07).toFixed(1)}" fill="#e2d09a" text-anchor="middle">ECHOES OF</text>
-        <text x="${w*.5}" y="${h*.97}" font-family="Georgia,serif" font-size="${(w*.07).toFixed(1)}" fill="#e2d09a" text-anchor="middle">MEMORY</text>
+        <rect x="0" y="${h*.83}" width="${w}" height="${h*.17}" fill="#3e5e4e" opacity="0.88"/>
+        <text x="${w*.5}" y="${h*.905}" font-family="Georgia,serif" font-size="${(w*.068).toFixed(1)}" fill="#e2d09a" text-anchor="middle">ECHOES OF</text>
+        <text x="${w*.5}" y="${h*.975}" font-family="Georgia,serif" font-size="${(w*.068).toFixed(1)}" fill="#e2d09a" text-anchor="middle">MEMORY</text>
       </svg>`;
     }
   },
   {
-    id: 2,
+    id: 2, ix: 482, iy: 618,
     title: "The Empathy Engine",
     tag: "Emotion & Connection",
     tagBg: "#f2e0ec", tagFg: "#8a2860",
@@ -622,31 +311,25 @@ const PROJECTS = [
     body: "Trained on decades of human correspondence, the engine learns the weight of silence, the curve of hesitation, the warmth between the lines.",
     makeCover(w, h) {
       return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="c2bg" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#d8a0c0"/>
-            <stop offset="100%" stop-color="#8a3060"/>
-          </linearGradient>
-        </defs>
-        <rect width="${w}" height="${h}" fill="url(#c2bg)"/>
-        <rect x="0" y="${h*.0}"  width="${w}" height="${h*.12}" fill="#f0c8dc" opacity="0.28"/>
-        <rect x="0" y="${h*.12}" width="${w}" height="${h*.10}" fill="#e8b0cc" opacity="0.22"/>
-        <rect x="0" y="${h*.22}" width="${w}" height="${h*.10}" fill="#d898b8" opacity="0.18"/>
-        <rect x="0" y="${h*.32}" width="${w}" height="${h*.10}" fill="#c880a8" opacity="0.15"/>
-        <path d="M ${w*.5},${h*.63} C ${w*.11},${h*.45} ${w*.11},${h*.23} ${w*.3},${h*.17} C ${w*.4},${h*.13} ${w*.48},${h*.2} ${w*.5},${h*.27} C ${w*.52},${h*.2} ${w*.6},${h*.13} ${w*.7},${h*.17} C ${w*.89},${h*.23} ${w*.89},${h*.45} ${w*.5},${h*.63} Z" fill="#f4dce8" opacity="0.78"/>
-        <path d="M ${w*.5},${h*.27} L ${w*.5},${h*.1} L ${w*.36},${h*.1} L ${w*.36},${h*.04}" stroke="#f4dce8" stroke-width="1.5" fill="none" opacity="0.65"/>
-        <path d="M ${w*.5},${h*.27} L ${w*.5},${h*.1} L ${w*.64},${h*.1} L ${w*.64},${h*.03}" stroke="#f4dce8" stroke-width="1.5" fill="none" opacity="0.65"/>
-        <circle cx="${w*.36}" cy="${h*.04}" r="3" fill="#f4dce8" opacity="0.84"/>
-        <circle cx="${w*.64}" cy="${h*.03}" r="3" fill="#f4dce8" opacity="0.84"/>
-        <path d="M ${w*.08},${h*.77} L ${w*.2},${h*.77} L ${w*.27},${h*.67} L ${w*.36},${h*.86} L ${w*.44},${h*.71} L ${w*.5},${h*.78} L ${w*.56},${h*.73} L ${w*.93},${h*.73}" stroke="#f4dce8" stroke-width="2" fill="none" opacity="0.82"/>
-        <rect x="0" y="${h*.85}" width="${w}" height="${h*.15}" fill="#6a1848" opacity="0.86"/>
-        <text x="${w*.5}" y="${h*.92}" font-family="Georgia,serif" font-size="${(w*.065).toFixed(1)}" fill="#f4dce8" text-anchor="middle">THE EMPATHY</text>
-        <text x="${w*.5}" y="${h*.99}" font-family="Georgia,serif" font-size="${(w*.065).toFixed(1)}" fill="#f4dce8" text-anchor="middle">ENGINE</text>
+        <defs><linearGradient id="cv2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#d8a0c0"/><stop offset="100%" stop-color="#8a3060"/>
+        </linearGradient></defs>
+        <rect width="${w}" height="${h}" fill="url(#cv2)"/>
+        <rect x="0" y="${h*.0}"  width="${w}" height="${h*.11}" fill="#f0c8dc" opacity="0.30"/>
+        <rect x="0" y="${h*.11}" width="${w}" height="${h*.10}" fill="#e8b0cc" opacity="0.24"/>
+        <rect x="0" y="${h*.21}" width="${w}" height="${h*.10}" fill="#d898b8" opacity="0.18"/>
+        <path d="M ${w*.5},${h*.63} C ${w*.11},${h*.45} ${w*.11},${h*.23} ${w*.3},${h*.17} C ${w*.4},${h*.13} ${w*.48},${h*.2} ${w*.5},${h*.27} C ${w*.52},${h*.2} ${w*.6},${h*.13} ${w*.7},${h*.17} C ${w*.89},${h*.23} ${w*.89},${h*.45} ${w*.5},${h*.63} Z" fill="#f4dce8" opacity="0.80"/>
+        <path d="M ${w*.5},${h*.27} L ${w*.5},${h*.1} L ${w*.36},${h*.1} L ${w*.36},${h*.04}" stroke="#f4dce8" stroke-width="1.5" fill="none" opacity="0.66"/>
+        <path d="M ${w*.5},${h*.27} L ${w*.5},${h*.1} L ${w*.64},${h*.1} L ${w*.64},${h*.03}" stroke="#f4dce8" stroke-width="1.5" fill="none" opacity="0.66"/>
+        <path d="M ${w*.08},${h*.77} L ${w*.2},${h*.77} L ${w*.27},${h*.67} L ${w*.36},${h*.86} L ${w*.44},${h*.71} L ${w*.5},${h*.78} L ${w*.56},${h*.73} L ${w*.93},${h*.73}" stroke="#f4dce8" stroke-width="2" fill="none" opacity="0.84"/>
+        <rect x="0" y="${h*.85}" width="${w}" height="${h*.15}" fill="#6a1848" opacity="0.88"/>
+        <text x="${w*.5}" y="${h*.92}" font-family="Georgia,serif" font-size="${(w*.063).toFixed(1)}" fill="#f4dce8" text-anchor="middle">THE EMPATHY</text>
+        <text x="${w*.5}" y="${h*.985}" font-family="Georgia,serif" font-size="${(w*.063).toFixed(1)}" fill="#f4dce8" text-anchor="middle">ENGINE</text>
       </svg>`;
     }
   },
   {
-    id: 3,
+    id: 3, ix: 696, iy: 456,
     title: "Cartography of Dreams",
     tag: "Mind & Mapping",
     tagBg: "#e0e0f8", tagFg: "#32328a",
@@ -654,37 +337,31 @@ const PROJECTS = [
     body: "Using language models trained on dream journals collected across cultures, the system generates unique topographies of the sleeping mind — each map unrepeatable.",
     makeCover(w, h) {
       return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="c3bg" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#8890d0"/>
-            <stop offset="100%" stop-color="#28287a"/>
-          </linearGradient>
-        </defs>
-        <rect width="${w}" height="${h}" fill="url(#c3bg)"/>
+        <defs><linearGradient id="cv3" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#8890d0"/><stop offset="100%" stop-color="#28287a"/>
+        </linearGradient></defs>
+        <rect width="${w}" height="${h}" fill="url(#cv3)"/>
         <rect x="0" y="${h*.38}" width="${w}" height="${h*.62}" fill="#22226a" opacity="0.52"/>
-        <path d="M 0,${h*.43} C ${w*.15},${h*.32} ${w*.32},${h*.48} ${w*.5},${h*.37} C ${w*.68},${h*.26} ${w*.85},${h*.44} ${w},${h*.37}" stroke="#9ea8e0" stroke-width="1.5" fill="none" opacity="0.60"/>
-        <path d="M 0,${h*.51} C ${w*.12},${h*.39} ${w*.35},${h*.54} ${w*.5},${h*.43} C ${w*.65},${h*.32} ${w*.88},${h*.50} ${w},${h*.42}" stroke="#9ea8e0" stroke-width="1.4" fill="none" opacity="0.52"/>
-        <path d="M 0,${h*.59} C ${w*.15},${h*.47} ${w*.38},${h*.64} ${w*.5},${h*.51} C ${w*.62},${h*.38} ${w*.85},${h*.58} ${w},${h*.50}" stroke="#9ea8e0" stroke-width="1.2" fill="none" opacity="0.44"/>
-        <path d="M 0,${h*.67} C ${w*.18},${h*.55} ${w*.4},${h*.72} ${w*.5},${h*.61} C ${w*.6},${h*.50} ${w*.82},${h*.68} ${w},${h*.59}" stroke="#9ea8e0" stroke-width="1.0" fill="none" opacity="0.36"/>
-        <path d="M 0,${h*.75} C ${w*.2},${h*.63} ${w*.42},${h*.80} ${w*.5},${h*.69} C ${w*.58},${h*.58} ${w*.8},${h*.76} ${w},${h*.67}" stroke="#9ea8e0" stroke-width="0.8" fill="none" opacity="0.28"/>
+        <path d="M 0,${h*.43} C ${w*.15},${h*.32} ${w*.32},${h*.48} ${w*.5},${h*.37} C ${w*.68},${h*.26} ${w*.85},${h*.44} ${w},${h*.37}" stroke="#9ea8e0" stroke-width="1.5" fill="none" opacity="0.62"/>
+        <path d="M 0,${h*.52} C ${w*.12},${h*.40} ${w*.35},${h*.55} ${w*.5},${h*.44} C ${w*.65},${h*.33} ${w*.88},${h*.51} ${w},${h*.43}" stroke="#9ea8e0" stroke-width="1.4" fill="none" opacity="0.52"/>
+        <path d="M 0,${h*.61} C ${w*.15},${h*.48} ${w*.38},${h*.65} ${w*.5},${h*.52} C ${w*.62},${h*.39} ${w*.85},${h*.59} ${w},${h*.51}" stroke="#9ea8e0" stroke-width="1.1" fill="none" opacity="0.42"/>
+        <path d="M 0,${h*.70} C ${w*.18},${h*.57} ${w*.40},${h*.73} ${w*.5},${h*.62} C ${w*.60},${h*.51} ${w*.82},${h*.69} ${w},${h*.60}" stroke="#9ea8e0" stroke-width="0.9" fill="none" opacity="0.32"/>
         <circle cx="${w*.67}" cy="${h*.2}"  r="${w*.17}"  fill="#d8d8f8" opacity="0.56"/>
         <circle cx="${w*.75}" cy="${h*.15}" r="${w*.148}" fill="#5060a8" opacity="0.96"/>
-        <circle cx="${w*.12}" cy="${h*.14}" r="1.8" fill="#d8d8f8" opacity="0.84"/>
-        <circle cx="${w*.3}"  cy="${h*.09}" r="1.4" fill="#d8d8f8" opacity="0.74"/>
-        <circle cx="${w*.43}" cy="${h*.18}" r="1.8" fill="#d8d8f8" opacity="0.84"/>
-        <circle cx="${w*.1}"  cy="${h*.26}" r="1"   fill="#d8d8f8" opacity="0.66"/>
-        <circle cx="${w*.22}" cy="${h*.5}"  r="${w*.15}" fill="none" stroke="#9ea8e0" stroke-width="1" opacity="0.50"/>
+        <circle cx="${w*.12}" cy="${h*.13}" r="1.8" fill="#d8d8f8" opacity="0.84"/>
+        <circle cx="${w*.3}"  cy="${h*.08}" r="1.4" fill="#d8d8f8" opacity="0.74"/>
+        <circle cx="${w*.43}" cy="${h*.17}" r="1.8" fill="#d8d8f8" opacity="0.84"/>
+        <circle cx="${w*.22}" cy="${h*.5}"  r="${w*.15}" fill="none" stroke="#9ea8e0" stroke-width="1" opacity="0.52"/>
         <line x1="${w*.22}" y1="${h*.35}" x2="${w*.22}" y2="${h*.65}" stroke="#9ea8e0" stroke-width="1" opacity="0.56"/>
         <line x1="${w*.07}" y1="${h*.5}"  x2="${w*.37}" y2="${h*.5}"  stroke="#9ea8e0" stroke-width="1" opacity="0.56"/>
-        <polygon points="${w*.22},${h*.35} ${w*.19},${h*.41} ${w*.25},${h*.41}" fill="#9ea8e0" opacity="0.72"/>
         <rect x="0" y="${h*.84}" width="${w}" height="${h*.16}" fill="#1a1a5e" opacity="0.90"/>
-        <text x="${w*.5}" y="${h*.91}" font-family="Georgia,serif" font-size="${(w*.065).toFixed(1)}" fill="#d8d8f8" text-anchor="middle">CARTOGRAPHY</text>
-        <text x="${w*.5}" y="${h*.98}" font-family="Georgia,serif" font-size="${(w*.065).toFixed(1)}" fill="#d8d8f8" text-anchor="middle">OF DREAMS</text>
+        <text x="${w*.5}" y="${h*.91}" font-family="Georgia,serif" font-size="${(w*.063).toFixed(1)}" fill="#d8d8f8" text-anchor="middle">CARTOGRAPHY</text>
+        <text x="${w*.5}" y="${h*.98}" font-family="Georgia,serif" font-size="${(w*.063).toFixed(1)}" fill="#d8d8f8" text-anchor="middle">OF DREAMS</text>
       </svg>`;
     }
   },
   {
-    id: 4,
+    id: 4, ix: 964, iy: 292,
     title: "Roots & Algorithms",
     tag: "Nature & Systems",
     tagBg: "#daf0cc", tagFg: "#285a1e",
@@ -692,13 +369,10 @@ const PROJECTS = [
     body: "Fractal geometry, mycelial networks, and evolutionary algorithms converge in a living visualization that grows differently each time it runs.",
     makeCover(w, h) {
       return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="c4bg" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#88aa60"/>
-            <stop offset="100%" stop-color="#2e4e22"/>
-          </linearGradient>
-        </defs>
-        <rect width="${w}" height="${h}" fill="url(#c4bg)"/>
+        <defs><linearGradient id="cv4" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#88aa60"/><stop offset="100%" stop-color="#2e4e22"/>
+        </linearGradient></defs>
+        <rect width="${w}" height="${h}" fill="url(#cv4)"/>
         <rect x="0" y="${h*.52}" width="${w}" height="${h*.48}" fill="#243c18" opacity="0.48"/>
         <rect x="${w*.46}" y="${h*.38}" width="${w*.08}" height="${h*.32}" fill="#243c18" opacity="0.88" rx="3"/>
         <circle cx="${w*.5}" cy="${h*.36}" r="${w*.048}" fill="#d2e8b4" opacity="0.88"/>
@@ -712,22 +386,16 @@ const PROJECTS = [
         <line x1="${w*.3}"  y1="${h*.2}"  x2="${w*.38}" y2="${h*.07}" stroke="#9ec87a" stroke-width="1" opacity="0.58"/>
         <line x1="${w*.68}" y1="${h*.17}" x2="${w*.58}" y2="${h*.06}" stroke="#9ec87a" stroke-width="1" opacity="0.58"/>
         <line x1="${w*.68}" y1="${h*.17}" x2="${w*.80}" y2="${h*.07}" stroke="#9ec87a" stroke-width="1" opacity="0.58"/>
-        <circle cx="${w*.16}" cy="${h*.09}" r="${w*.024}" fill="#9ec87a" opacity="0.68"/>
-        <circle cx="${w*.38}" cy="${h*.07}" r="${w*.024}" fill="#9ec87a" opacity="0.68"/>
-        <circle cx="${w*.58}" cy="${h*.06}" r="${w*.024}" fill="#9ec87a" opacity="0.68"/>
-        <circle cx="${w*.80}" cy="${h*.07}" r="${w*.024}" fill="#9ec87a" opacity="0.68"/>
-        <path d="M ${w*.5},${h*.7}  C ${w*.37},${h*.77} ${w*.24},${h*.83} ${w*.13},${h*.92}" stroke="#243c18" stroke-width="3"   fill="none" opacity="0.72" stroke-linecap="round"/>
-        <path d="M ${w*.5},${h*.7}  C ${w*.44},${h*.81} ${w*.40},${h*.89} ${w*.38},${h*.99}" stroke="#243c18" stroke-width="2.5" fill="none" opacity="0.65" stroke-linecap="round"/>
-        <path d="M ${w*.5},${h*.7}  C ${w*.63},${h*.77} ${w*.75},${h*.84} ${w*.87},${h*.94}" stroke="#243c18" stroke-width="3"   fill="none" opacity="0.72" stroke-linecap="round"/>
-        <path d="M ${w*.5},${h*.72} C ${w*.61},${h*.81} ${w*.73},${h*.88} ${w*.83},${h*.97}" stroke="#243c18" stroke-width="2"   fill="none" opacity="0.55" stroke-linecap="round"/>
+        <path d="M ${w*.5},${h*.7} C ${w*.37},${h*.77} ${w*.24},${h*.83} ${w*.13},${h*.92}" stroke="#243c18" stroke-width="3" fill="none" opacity="0.72" stroke-linecap="round"/>
+        <path d="M ${w*.5},${h*.7} C ${w*.63},${h*.77} ${w*.75},${h*.84} ${w*.87},${h*.94}" stroke="#243c18" stroke-width="3" fill="none" opacity="0.72" stroke-linecap="round"/>
         <rect x="0" y="${h*.84}" width="${w}" height="${h*.16}" fill="#1e3412" opacity="0.90"/>
-        <text x="${w*.5}" y="${h*.91}" font-family="Georgia,serif" font-size="${(w*.067).toFixed(1)}" fill="#d2e8b4" text-anchor="middle">ROOTS &amp;</text>
-        <text x="${w*.5}" y="${h*.98}" font-family="Georgia,serif" font-size="${(w*.067).toFixed(1)}" fill="#d2e8b4" text-anchor="middle">ALGORITHMS</text>
+        <text x="${w*.5}" y="${h*.91}" font-family="Georgia,serif" font-size="${(w*.065).toFixed(1)}" fill="#d2e8b4" text-anchor="middle">ROOTS &amp;</text>
+        <text x="${w*.5}" y="${h*.98}" font-family="Georgia,serif" font-size="${(w*.065).toFixed(1)}" fill="#d2e8b4" text-anchor="middle">ALGORITHMS</text>
       </svg>`;
     }
   },
   {
-    id: 5,
+    id: 5, ix: 1166, iy: 140,
     title: "The Listening Archive",
     tag: "Voice & Preservation",
     tagBg: "#f5e8d4", tagFg: "#7a4e10",
@@ -735,49 +403,262 @@ const PROJECTS = [
     body: "An AI archivist that not only preserves sound but understands context — linking stories across languages, geographies, and generations into a living tapestry of human experience.",
     makeCover(w, h) {
       return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <radialGradient id="c5bg" cx="50%" cy="40%" r="60%">
-            <stop offset="0%" stop-color="#e0b060"/>
-            <stop offset="100%" stop-color="#7a5010"/>
-          </radialGradient>
-        </defs>
-        <rect width="${w}" height="${h}" fill="url(#c5bg)"/>
+        <defs><radialGradient id="cv5" cx="50%" cy="40%" r="60%">
+          <stop offset="0%" stop-color="#e0b060"/><stop offset="100%" stop-color="#7a5010"/>
+        </radialGradient></defs>
+        <rect width="${w}" height="${h}" fill="url(#cv5)"/>
         <ellipse cx="${w*.5}" cy="${h*.48}" rx="${w*.46}" ry="${h*.46}" fill="#f4e6be" opacity="0.18"/>
         <path d="M ${w*.5},${h*.18} C ${w*.5},${h*.18} ${w*.38},${h*.34} ${w*.38},${h*.5} C ${w*.38},${h*.58} ${w*.44},${h*.64} ${w*.5},${h*.64}" stroke="#7c5010" stroke-width="2.5" fill="none" opacity="0.72" stroke-linecap="round"/>
         <path d="M ${w*.5},${h*.18} C ${w*.5},${h*.18} ${w*.62},${h*.34} ${w*.62},${h*.5} C ${w*.62},${h*.58} ${w*.56},${h*.64} ${w*.5},${h*.64}" stroke="#7c5010" stroke-width="2.5" fill="none" opacity="0.72" stroke-linecap="round"/>
         <line x1="${w*.38}" y1="${h*.5}"  x2="${w*.22}" y2="${h*.42}" stroke="#7c5010" stroke-width="1.5" opacity="0.60"/>
-        <line x1="${w*.38}" y1="${h*.5}"  x2="${w*.2}"  y2="${h*.52}" stroke="#7c5010" stroke-width="1.5" opacity="0.56"/>
         <line x1="${w*.62}" y1="${h*.5}"  x2="${w*.78}" y2="${h*.42}" stroke="#7c5010" stroke-width="1.5" opacity="0.60"/>
-        <line x1="${w*.62}" y1="${h*.5}"  x2="${w*.80}" y2="${h*.52}" stroke="#7c5010" stroke-width="1.5" opacity="0.56"/>
         <path d="M ${w*.3},${h*.26} C ${w*.33},${h*.20} ${w*.40},${h*.18} ${w*.44},${h*.21} C ${w*.48},${h*.18} ${w*.55},${h*.16} ${w*.58},${h*.20}" stroke="#7c5010" stroke-width="2" fill="none" opacity="0.78" stroke-linecap="round"/>
         <path d="M ${w*.2},${h*.18} C ${w*.23},${h*.12} ${w*.30},${h*.10} ${w*.34},${h*.13} C ${w*.38},${h*.10} ${w*.45},${h*.08} ${w*.48},${h*.12}" stroke="#7c5010" stroke-width="1.5" fill="none" opacity="0.66" stroke-linecap="round"/>
-        <path d="M ${w*.42},${h*.10} C ${w*.45},${h*.04} ${w*.52},${h*.02} ${w*.56},${h*.05} C ${w*.60},${h*.02} ${w*.67},${h*.01} ${w*.70},${h*.05}" stroke="#7c5010" stroke-width="1.5" fill="none" opacity="0.64" stroke-linecap="round"/>
         <line x1="${w*.5}" y1="${h*.64}" x2="${w*.5}" y2="${h*.74}" stroke="#7c5010" stroke-width="2" opacity="0.70"/>
         <line x1="${w*.36}" y1="${h*.74}" x2="${w*.64}" y2="${h*.74}" stroke="#7c5010" stroke-width="2" opacity="0.70"/>
         <rect x="0" y="${h*.84}" width="${w}" height="${h*.16}" fill="#5a3408" opacity="0.90"/>
-        <text x="${w*.5}" y="${h*.91}" font-family="Georgia,serif" font-size="${(w*.065).toFixed(1)}" fill="#f4e6be" text-anchor="middle">LISTENING</text>
-        <text x="${w*.5}" y="${h*.98}" font-family="Georgia,serif" font-size="${(w*.065).toFixed(1)}" fill="#f4e6be" text-anchor="middle">ARCHIVE</text>
+        <text x="${w*.5}" y="${h*.91}" font-family="Georgia,serif" font-size="${(w*.063).toFixed(1)}" fill="#f4e6be" text-anchor="middle">LISTENING</text>
+        <text x="${w*.5}" y="${h*.98}" font-family="Georgia,serif" font-size="${(w*.063).toFixed(1)}" fill="#f4e6be" text-anchor="middle">ARCHIVE</text>
       </svg>`;
     }
   }
 ];
 
-function renderCards() {
-  PROJECTS.forEach(p => {
-    const el = document.querySelector(`.project-card[data-id="${p.id}"]`);
-    if (el) el.innerHTML = p.makeCover(120, 160);
+/* ── Catmull-Rom spline through waypoints ───────────────── */
+function splinePath(pts) {
+  if (pts.length < 2) return '';
+  let d = `M ${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[Math.max(0, i - 1)];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[Math.min(pts.length - 1, i + 2)];
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C ${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
+  }
+  return d;
+}
+
+function offsetPts(pts, dx, dy) {
+  return pts.map(p => ({ x: p.x + dx, y: p.y + dy }));
+}
+
+function svgPath(d, attrs) {
+  const el = document.createElementNS(SVG_NS, 'path');
+  el.setAttribute('d', d);
+  el.setAttribute('fill', 'none');
+  el.setAttribute('stroke-linecap', 'round');
+  Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+  return el;
+}
+
+function svgEl(tag, attrs) {
+  const el = document.createElementNS(SVG_NS, tag);
+  Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+  return el;
+}
+
+/* ── Build the river ────────────────────────────────────── */
+function buildRiver() {
+  const layer = document.getElementById('river-layer');
+  const N = PROJECTS.length;
+  const allPts = [SRC, ...PROJECTS.map(p => ({ x: p.ix, y: p.iy })), DEST];
+  const fullD  = splinePath(allPts);
+
+  /* Base thin washes — full path */
+  layer.appendChild(svgPath(splinePath(offsetPts(allPts, -6, -5)), {
+    stroke: '#7898b8', 'stroke-width': 16, opacity: 0.16
+  }));
+  layer.appendChild(svgPath(fullD, {
+    stroke: '#8aaec8', 'stroke-width': 22, opacity: 0.18
+  }));
+  layer.appendChild(svgPath(splinePath(offsetPts(allPts, 8, 6)), {
+    stroke: '#94b8d0', 'stroke-width': 14, opacity: 0.14
+  }));
+
+  /* Stacked wider segments from each island to destination:
+     wider toward the top-right as the river gathers volume */
+  PROJECTS.forEach((proj, i) => {
+    const segPts = [
+      { x: proj.ix, y: proj.iy },
+      ...PROJECTS.slice(i + 1).map(q => ({ x: q.ix, y: q.iy })),
+      DEST
+    ];
+    const w1 = (N - i) * 24 + 20;
+    const w2 = w1 * 0.65;
+    const op1 = 0.075 + (N - i) * 0.008;
+    const op2 = op1 + 0.025;
+    const d = splinePath(segPts);
+    layer.appendChild(svgPath(d, { stroke: '#6898b8', 'stroke-width': w1, opacity: op1 }));
+    layer.appendChild(svgPath(d, { stroke: '#82aec8', 'stroke-width': w2, opacity: op2 }));
+  });
+
+  /* Lavender atmosphere wash */
+  layer.appendChild(svgPath(splinePath(offsetPts(allPts, -10, -8)), {
+    stroke: '#a8a0cc', 'stroke-width': 38, opacity: 0.07
+  }));
+
+  /* Dry-brush frayed edge strokes */
+  const frays = [
+    { dx: -10, dy: -8,  w: 3.0, op: 0.18, dash: '42,14,58,9,38,18' },
+    { dx:  14, dy:  10, w: 2.5, op: 0.15, dash: '55,11,36,19,62,8' },
+    { dx: -18, dy: -13, w: 2.0, op: 0.12, dash: '32,22,48,11,44,20' },
+    { dx:  22, dy:  15, w: 2.0, op: 0.13, dash: '46,16,34,22,56,10' },
+    { dx:  -6, dy:  -5, w: 1.5, op: 0.10, dash: '28,24,52,12,36,22' },
+    { dx:  28, dy:  20, w: 1.5, op: 0.09, dash: '60,14,40,18,50,12' },
+  ];
+  frays.forEach(f => {
+    const el = svgPath(splinePath(offsetPts(allPts, f.dx, f.dy)), {
+      stroke: '#6090b2', 'stroke-width': f.w, opacity: f.op,
+      'stroke-dasharray': f.dash
+    });
+    layer.appendChild(el);
+  });
+
+  /* Subtle watercolour bleed blobs along the river */
+  allPts.slice(1, -1).forEach(pt => {
+    layer.appendChild(svgEl('ellipse', {
+      cx: pt.x, cy: pt.y, rx: 55, ry: 34,
+      fill: '#8aaec4', opacity: 0.06,
+      filter: 'url(#blur-md)'
+    }));
   });
 }
 
+/* ── Build islands ──────────────────────────────────────── */
+function buildIslands() {
+  const layer = document.getElementById('island-layer');
+
+  PROJECTS.forEach(p => {
+    /* Mist spray (drawn first, behind island) */
+    [
+      { dx: -52, dy: -5,  rx: 58, ry: 30, fill: '#b4c4d4', op: 0.18 },
+      { dx:  46, dy:  9,  rx: 50, ry: 26, fill: '#b8c8d6', op: 0.14 },
+      { dx:  -2, dy: -38, rx: 42, ry: 22, fill: '#b0b8d0', op: 0.10 },
+    ].forEach(m => {
+      layer.appendChild(svgEl('ellipse', {
+        cx: p.ix + m.dx, cy: p.iy + m.dy,
+        rx: m.rx, ry: m.ry,
+        fill: m.fill, opacity: m.op,
+        filter: 'url(#blur-md)'
+      }));
+    });
+
+    /* Island body */
+    layer.appendChild(svgEl('ellipse', {
+      cx: p.ix, cy: p.iy, rx: 66, ry: 42,
+      fill: '#c2ba9a', opacity: 0.60
+    }));
+    layer.appendChild(svgEl('ellipse', {
+      cx: p.ix - 5, cy: p.iy - 5, rx: 52, ry: 33,
+      fill: '#cec6a4', opacity: 0.52
+    }));
+    /* Soft edge glow */
+    layer.appendChild(svgEl('ellipse', {
+      cx: p.ix, cy: p.iy, rx: 72, ry: 46,
+      fill: '#bab29a', opacity: 0.20,
+      filter: 'url(#blur-sm)'
+    }));
+
+    /* Sparse Pootoogook pebble marks on island */
+    layer.appendChild(svgEl('circle', {
+      cx: p.ix + 22, cy: p.iy + 8, r: 3.5,
+      fill: '#8a8070', opacity: 0.55
+    }));
+    layer.appendChild(svgEl('circle', {
+      cx: p.ix - 18, cy: p.iy + 12, r: 2.5,
+      fill: '#8a8070', opacity: 0.42
+    }));
+    layer.appendChild(svgEl('circle', {
+      cx: p.ix + 8,  cy: p.iy + 16, r: 2,
+      fill: '#9a9082', opacity: 0.36
+    }));
+  });
+}
+
+/* ── Card backs (Turner + Pootoogook watercolour) ───────── */
+function makeBack(id, w, h) {
+  const v = [
+    { e1: [0.30, 0.35], e2: [0.68, 0.60], lx: [0.16, 0.74], ly: [0.74, 0.68] },
+    { e1: [0.50, 0.38], e2: [0.48, 0.64], lx: [0.14, 0.84], ly: [0.70, 0.74] },
+    { e1: [0.72, 0.30], e2: [0.32, 0.66], lx: [0.18, 0.80], ly: [0.76, 0.70] },
+    { e1: [0.38, 0.58], e2: [0.62, 0.36], lx: [0.15, 0.82], ly: [0.72, 0.66] },
+    { e1: [0.56, 0.44], e2: [0.44, 0.60], lx: [0.17, 0.78], ly: [0.75, 0.69] },
+  ][id - 1];
+  const s = (n) => n.toFixed(1);
+  return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+    <rect width="${w}" height="${h}" fill="#9aaec0"/>
+    <ellipse cx="${s(w*v.e1[0])}" cy="${s(h*v.e1[1])}" rx="${s(w*.70)}" ry="${s(h*.65)}" fill="#b0c2d4" opacity="0.44"/>
+    <ellipse cx="${s(w*v.e2[0])}" cy="${s(h*v.e2[1])}" rx="${s(w*.58)}" ry="${s(h*.54)}" fill="#92aaC2" opacity="0.38"/>
+    <ellipse cx="${s(w*.5)}" cy="${s(h*.20)}" rx="${s(w*.52)}" ry="${s(h*.20)}" fill="#c4d4e4" opacity="0.28"/>
+    <ellipse cx="${s(w*.5)}" cy="${s(h*.85)}" rx="${s(w*.48)}" ry="${s(h*.16)}" fill="#88a0b8" opacity="0.20"/>
+    <path d="M ${s(w*v.lx[0])},${s(h*v.ly[0])} C ${s(w*.38)},${s(h*(v.ly[0]-.04))} ${s(w*.64)},${s(h*(v.ly[1]+.03))} ${s(w*v.lx[1])},${s(h*v.ly[1])}"
+      stroke="#2840a0" stroke-width="${s(w*.024)}" fill="none" opacity="0.52" stroke-linecap="round"/>
+    <circle cx="${s(w*.20)}" cy="${s(h*.84)}" r="${s(w*.035)}" fill="#2840a0" opacity="0.38"/>
+    <circle cx="${s(w*.29)}" cy="${s(h*.87)}" r="${s(w*.022)}" fill="#2840a0" opacity="0.28"/>
+    <line x1="${s(w*.64)}" y1="${s(h*.14)}" x2="${s(w*.78)}" y2="${s(h*.17)}" stroke="#3050b8" stroke-width="${s(w*.016)}" opacity="0.32" stroke-linecap="round"/>
+  </svg>`;
+}
+
+/* ── Build cards ────────────────────────────────────────── */
+function buildCards() {
+  const layer = document.getElementById('card-layer');
+  const CW = 88, CH = 118;   /* card face dimensions */
+  const FOW = 112, FOH = 152; /* foreignObject (slightly larger for 3-D flip room) */
+
+  PROJECTS.forEach(p => {
+    const fo = document.createElementNS(SVG_NS, 'foreignObject');
+    fo.setAttribute('x',  p.ix - FOW / 2);
+    fo.setAttribute('y',  p.iy - CH * 0.88); /* card sits on island */
+    fo.setAttribute('width',  FOW);
+    fo.setAttribute('height', FOH);
+    fo.setAttribute('overflow', 'visible');
+
+    const outer = document.createElementNS(XHTML_NS, 'div');
+    outer.className = 'card-fo-wrap';
+    outer.style.cssText = `width:${FOW}px;height:${FOH}px;`;
+
+    const wrap = document.createElementNS(XHTML_NS, 'div');
+    wrap.className = 'card-wrap';
+
+    const inner = document.createElementNS(XHTML_NS, 'div');
+    inner.className = 'card-inner';
+    inner.dataset.id = p.id;
+
+    const back = document.createElementNS(XHTML_NS, 'div');
+    back.className = 'card-face card-back';
+    back.innerHTML = makeBack(p.id, CW, CH);
+
+    const front = document.createElementNS(XHTML_NS, 'div');
+    front.className = 'card-face card-front';
+    front.innerHTML = p.makeCover(CW, CH);
+
+    inner.appendChild(back);
+    inner.appendChild(front);
+    wrap.appendChild(inner);
+    outer.appendChild(wrap);
+    fo.appendChild(outer);
+    layer.appendChild(fo);
+
+    inner.addEventListener('mouseenter', () => inner.classList.add('revealed'));
+    inner.addEventListener('mouseleave', () => inner.classList.remove('revealed'));
+    inner.addEventListener('click',      () => openDetail(p.id));
+  });
+}
+
+/* ── Modal ──────────────────────────────────────────────── */
 function openDetail(id) {
   const p = PROJECTS.find(x => x.id === id);
   if (!p) return;
   document.getElementById('modal-cover-wrap').innerHTML = p.makeCover(460, 614);
-  document.getElementById('modal-title').textContent = p.title;
+  document.getElementById('modal-title').textContent    = p.title;
   const tag = document.getElementById('modal-tag');
-  tag.textContent = p.tag;
+  tag.textContent     = p.tag;
   tag.style.background = p.tagBg;
-  tag.style.color = p.tagFg;
+  tag.style.color      = p.tagFg;
   document.getElementById('modal-desc').textContent = p.desc;
   document.getElementById('modal-body').textContent = p.body;
   document.getElementById('modal-overlay').classList.add('open');
@@ -787,24 +668,15 @@ function closeDetail() {
   document.getElementById('modal-overlay').classList.remove('open');
 }
 
-document.getElementById('tree-svg').addEventListener('click', e => {
-  const card = e.target.closest('.project-card');
-  if (card) openDetail(Number(card.dataset.id));
-});
-
-document.querySelectorAll('.project-card').forEach(card => {
-  const id = card.dataset.id;
-  const stem = document.getElementById(`stem-${id}`);
-  card.addEventListener('mouseenter', () => { if (stem) stem.style.opacity = '0.88'; });
-  card.addEventListener('mouseleave', () => { if (stem) stem.style.opacity = '0'; });
-});
-
 document.getElementById('modal-close').addEventListener('click', closeDetail);
 document.getElementById('modal-overlay').addEventListener('click', e => {
   if (e.target === document.getElementById('modal-overlay')) closeDetail();
 });
 
-renderCards();
+/* ── Init ───────────────────────────────────────────────── */
+buildRiver();
+buildIslands();
+buildCards();
 document.getElementById('project-count').textContent = `${PROJECTS.length} projects`;
 </script>
 </body>
