@@ -28,7 +28,7 @@ body {
   display: flex; align-items: center; justify-content: center;
 }
 .card-wrap {
-  width: 86px; height: 116px;
+  width: 70px; height: 94px;
   perspective: 700px;
 }
 .card-inner {
@@ -38,7 +38,7 @@ body {
   transition: transform 0.54s cubic-bezier(0.4,0,0.2,1);
   cursor: pointer;
 }
-.card-inner.revealed { transform: rotateY(180deg); }
+.card-wrap:hover .card-inner { transform: rotateY(180deg); }
 
 .card-face {
   position: absolute; inset: 0;
@@ -50,20 +50,20 @@ body {
 .card-back  svg,
 .card-front svg { width: 100%; height: 100%; display: block; }
 
-/* Ten distinct stone silhouettes */
-.card-face[data-stone="1"]  { clip-path: path('M 43,6 C 63,0 85,12 91,36 C 97,60 92,92 76,108 C 60,124 34,122 18,106 C 2,90 -1,62 6,38 C 13,14 23,12 43,6 Z'); }
-.card-face[data-stone="2"]  { clip-path: path('M 45,10 C 67,2 91,20 93,46 C 95,72 81,102 57,112 C 33,122 5,112 -2,84 C -9,56 4,28 22,14 C 40,0 23,18 45,10 Z'); }
-.card-face[data-stone="3"]  { clip-path: path('M 43,4 C 61,-2 79,10 85,34 C 91,58 89,90 77,108 C 65,126 43,126 27,112 C 11,98 4,72 6,46 C 8,20 25,10 43,4 Z'); }
-.card-face[data-stone="4"]  { clip-path: path('M 40,8 C 62,-1 92,14 97,40 C 102,66 90,102 65,113 C 40,124 12,116 3,90 C -6,64 2,36 16,18 C 30,-1 18,17 40,8 Z'); }
-.card-face[data-stone="5"]  { clip-path: path('M 44,12 C 66,4 90,22 92,50 C 94,78 79,106 55,114 C 31,122 3,110 -3,82 C -9,54 5,28 23,16 C 41,4 22,20 44,12 Z'); }
-.card-face[data-stone="6"]  { clip-path: path('M 42,6 C 63,-3 91,12 96,40 C 101,68 88,100 63,112 C 38,124 9,116 1,90 C -7,64 1,36 15,18 C 29,-1 21,15 42,6 Z'); }
-.card-face[data-stone="7"]  { clip-path: path('M 44,5 C 62,1 80,14 86,38 C 92,62 89,94 73,110 C 57,126 33,124 17,108 C 1,92 -2,62 5,38 C 12,14 26,9 44,5 Z'); }
-.card-face[data-stone="8"]  { clip-path: path('M 44,10 C 68,3 93,22 95,50 C 97,78 82,106 56,114 C 30,122 0,110 -5,82 C -10,54 3,26 22,14 C 41,-1 20,17 44,10 Z'); }
-.card-face[data-stone="9"]  { clip-path: path('M 44,8 C 62,2 84,18 88,44 C 92,70 84,98 62,110 C 40,122 14,116 6,90 C -2,64 4,38 18,20 C 32,2 26,14 44,8 Z'); }
-.card-face[data-stone="10"] { clip-path: path('M 48,6 C 70,0 95,18 97,46 C 99,74 85,104 60,114 C 35,124 6,114 0,86 C -6,58 5,30 20,16 C 35,-1 26,12 48,6 Z'); }
+/* Ten distinct stone silhouettes — scaled to 70×94 */
+.card-face[data-stone="1"]  { clip-path: path('M 35,5 C 51,0 69,10 74,29 C 79,49 75,75 62,88 C 49,100 28,99 15,86 C 2,73 -1,50 5,31 C 11,11 19,10 35,5 Z'); }
+.card-face[data-stone="2"]  { clip-path: path('M 37,8 C 55,2 74,16 76,37 C 77,58 66,83 46,91 C 27,99 4,91 -2,68 C -7,45 3,23 18,11 C 33,0 19,15 37,8 Z'); }
+.card-face[data-stone="3"]  { clip-path: path('M 35,3 C 50,-2 64,8 69,28 C 74,47 72,73 63,87 C 53,102 35,102 22,91 C 9,79 3,58 5,37 C 7,16 20,8 35,3 Z'); }
+.card-face[data-stone="4"]  { clip-path: path('M 33,6 C 50,-1 75,11 79,32 C 83,53 73,83 53,92 C 33,100 10,94 2,73 C -5,52 2,29 13,15 C 24,-1 15,14 33,6 Z'); }
+.card-face[data-stone="5"]  { clip-path: path('M 36,10 C 54,3 73,18 75,41 C 77,63 64,86 45,92 C 25,99 2,89 -2,66 C -7,44 4,23 19,13 C 33,3 18,16 36,10 Z'); }
+.card-face[data-stone="6"]  { clip-path: path('M 34,5 C 51,-2 74,10 78,32 C 82,55 72,81 51,91 C 31,100 7,94 1,73 C -6,52 1,29 12,15 C 24,-1 17,12 34,5 Z'); }
+.card-face[data-stone="7"]  { clip-path: path('M 36,4 C 50,1 65,11 70,31 C 75,50 72,76 59,89 C 46,102 27,100 14,87 C 1,75 -2,50 4,31 C 10,11 21,7 36,4 Z'); }
+.card-face[data-stone="8"]  { clip-path: path('M 36,8 C 55,2 76,18 77,41 C 79,63 67,86 46,92 C 24,99 0,89 -4,66 C -8,44 2,21 18,11 C 33,-1 16,14 36,8 Z'); }
+.card-face[data-stone="9"]  { clip-path: path('M 36,6 C 50,2 68,15 72,36 C 75,57 68,79 50,89 C 33,99 11,94 5,73 C -2,52 3,31 15,16 C 26,2 21,11 36,6 Z'); }
+.card-face[data-stone="10"] { clip-path: path('M 39,5 C 57,0 77,15 79,37 C 81,60 69,84 49,92 C 28,100 5,92 0,70 C -5,47 4,24 16,13 C 28,-1 21,10 39,5 Z'); }
 
-.card-inner.revealed { filter: drop-shadow(0 3px 10px rgba(10,20,40,0.26)); }
-.card-inner.revealed:hover {
+.card-wrap:hover .card-inner { filter: drop-shadow(0 3px 10px rgba(10,20,40,0.26)); }
+.card-wrap:hover .card-inner:hover {
   filter: drop-shadow(0 0 10px rgba(255,206,44,0.92))
           drop-shadow(0 0 28px rgba(255,172,22,0.58));
 }
@@ -153,7 +153,7 @@ body {
   <h1>The River</h1>
   <p>A living body of work</p>
 </div>
-<div id="hint">Hover to reveal · Click to explore</div>
+<div id="hint">Hover to reveal · Click to explore · Scroll to zoom</div>
 <div id="project-count"></div>
 
 <div id="explorer">
@@ -524,16 +524,16 @@ function buildRiver(allPts) {
 
   /* Animated frayed edge strokes */
   const frays = [
-    { dx:-10, dy:-8,  w:3.0, op:0.18, dash:'44,14,58,9,38,20',  cls:'rf-a' },
-    { dx: 14, dy: 10, w:2.5, op:0.15, dash:'56,11,36,20,60,8',  cls:'rf-b' },
-    { dx:-20, dy:-14, w:2.0, op:0.12, dash:'32,24,48,12,44,22', cls:'rf-c' },
-    { dx: 24, dy: 16, w:2.0, op:0.12, dash:'46,18,34,24,54,10', cls:'rf-d' },
-    { dx: -6, dy: -5, w:1.5, op:0.09, dash:'28,26,52,14,36,24', cls:'rf-c' },
-    { dx: 30, dy: 22, w:1.5, op:0.08, dash:'62,16,42,20,50,14', cls:'rf-d' },
+    { dx:-10, dy:-8,  w:3.5, op:0.32, dash:'44,14,58,9,38,20',  cls:'rf-a' },
+    { dx: 14, dy: 10, w:3.0, op:0.26, dash:'56,11,36,20,60,8',  cls:'rf-b' },
+    { dx:-20, dy:-14, w:2.5, op:0.22, dash:'32,24,48,12,44,22', cls:'rf-c' },
+    { dx: 24, dy: 16, w:2.5, op:0.20, dash:'46,18,34,24,54,10', cls:'rf-d' },
+    { dx: -6, dy: -5, w:2.0, op:0.18, dash:'28,26,52,14,36,24', cls:'rf-c' },
+    { dx: 30, dy: 22, w:2.0, op:0.16, dash:'62,16,42,20,50,14', cls:'rf-d' },
   ];
   frays.forEach(f => {
     const el = path(spline(oshift(allPts, f.dx, f.dy)), {
-      stroke:'#6090b2', 'stroke-width':f.w, opacity:f.op, 'stroke-dasharray':f.dash
+      stroke:'#78a8cc', 'stroke-width':f.w, opacity:f.op, 'stroke-dasharray':f.dash
     });
     el.classList.add(f.cls);
     layer.appendChild(el);
@@ -741,7 +741,7 @@ function makeBack(id, w, h) {
 /* ── Build cards ────────────────────────────────────── */
 function buildCards() {
   const layer = document.getElementById('card-layer');
-  const CW = 86, CH = 116, FOW = 114, FOH = 150;
+  const CW = 70, CH = 94, FOW = 98, FOH = 124;
   const pivotOffY = 14; /* wobble pivot at stone base */
 
   PROJECTS.forEach(p => {
@@ -798,9 +798,7 @@ function buildCards() {
     wobbleG.appendChild(fo);
     layer.appendChild(wobbleG);
 
-    inner.addEventListener('mouseenter', () => inner.classList.add('revealed'));
-    inner.addEventListener('mouseleave', () => inner.classList.remove('revealed'));
-    inner.addEventListener('click',      () => openDetail(p.id));
+    inner.addEventListener('click', () => openDetail(p.id));
   });
 }
 
@@ -825,6 +823,29 @@ document.getElementById('modal-close').addEventListener('click', closeDetail);
 document.getElementById('modal-overlay').addEventListener('click', e => {
   if (e.target === document.getElementById('modal-overlay')) closeDetail();
 });
+
+/* ── Scroll-to-zoom ────────────────────────────────── */
+(function() {
+  const svgEl  = document.getElementById('river-svg');
+  let zoom = 1.0;
+  const ZOOM_MIN = 1.0, ZOOM_MAX = 1.30, STEP = 0.05;
+
+  svgEl.style.transition      = 'transform 0.30s cubic-bezier(0.25,0.46,0.45,0.94)';
+  svgEl.style.willChange      = 'transform';
+
+  document.getElementById('explorer').addEventListener('wheel', e => {
+    e.preventDefault();
+    const dir = e.deltaY < 0 ? 1 : -1;
+    zoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, zoom + dir * STEP));
+
+    /* Keep zoom centred on cursor */
+    const rect = svgEl.getBoundingClientRect();
+    const ox = ((e.clientX - rect.left) / rect.width  * 100).toFixed(2) + '%';
+    const oy = ((e.clientY - rect.top)  / rect.height * 100).toFixed(2) + '%';
+    svgEl.style.transformOrigin = `${ox} ${oy}`;
+    svgEl.style.transform       = `scale(${zoom})`;
+  }, { passive: false });
+})();
 
 /* ── Init ───────────────────────────────────────────── */
 const allPts = [SRC, ...PROJECTS.map(p=>({x:p.ix,y:p.iy})), DEST];
