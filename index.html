@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Growing Tree — Project Explorer</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #ede9df;
+  font-family: 'Georgia', serif;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+#explorer {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+#tree-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.project-card {
+  width: 120px;
+  height: 160px;
+  cursor: pointer;
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.22), 0 2px 6px rgba(0,0,0,0.12);
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease;
+  background: #fff;
+  position: relative;
+}
+
+.project-card:hover {
+  transform: scale(1.12) rotate(-2deg);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.28), 0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* Detail Panel */
+#detail-panel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 420px;
+  height: 100vh;
+  background: #faf8f2;
+  border-left: 1px solid #d8d0bc;
+  transform: translateX(100%);
+  transition: transform 0.42s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 300;
+  overflow-y: auto;
+  padding: 52px 38px 48px;
+}
+
+#detail-panel.open {
+  transform: translateX(0);
+}
+
+.close-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #aaa;
+  padding: 6px 10px;
+  border-radius: 50%;
+  transition: color 0.2s, background 0.2s;
+  line-height: 1;
+}
+.close-btn:hover { color: #333; background: #eee8d8; }
+
+#detail-cover-wrap {
+  width: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 30px;
+  box-shadow: 0 10px 36px rgba(0,0,0,0.14);
+  aspect-ratio: 3/4;
+}
+#detail-cover-wrap svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+#detail-title {
+  font-size: 26px;
+  font-weight: normal;
+  color: #181818;
+  margin-bottom: 10px;
+  letter-spacing: 0.2px;
+  line-height: 1.3;
+}
+
+.detail-tag {
+  display: inline-block;
+  font-size: 10px;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  padding: 5px 13px;
+  border-radius: 20px;
+  margin-bottom: 22px;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+
+#detail-desc {
+  font-size: 14.5px;
+  line-height: 1.9;
+  color: #444;
+  margin-bottom: 18px;
+}
+
+#detail-body {
+  font-size: 13.5px;
+  line-height: 1.95;
+  color: #888;
+  font-style: italic;
+  margin-bottom: 32px;
+}
+
+.explore-btn {
+  display: inline-block;
+  padding: 12px 30px;
+  border: 1.5px solid #3d5a3e;
+  color: #3d5a3e;
+  background: none;
+  border-radius: 2px;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.explore-btn:hover { background: #3d5a3e; color: #f0eedf; }
+
+#overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20,18,10,0.18);
+  z-index: 299;
+  display: none;
+  backdrop-filter: blur(2px);
+}
+#overlay.visible { display: block; }
+
+#page-label {
+  position: fixed;
+  top: 30px;
+  left: 38px;
+  z-index: 100;
+  pointer-events: none;
+}
+#page-label h1 {
+  font-size: 11.5px;
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+  color: #9a8e7c;
+  font-weight: normal;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+#page-label p {
+  font-size: 10px;
+  color: #c0b8a8;
+  letter-spacing: 0.8px;
+  margin-top: 6px;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+
+#hint {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  color: #c0b8a8;
+  text-transform: uppercase;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  pointer-events: none;
+  animation: fadeOut 1.2s ease 4s forwards;
+}
+@keyframes fadeOut { to { opacity: 0; } }
+
+#project-count {
+  position: fixed;
+  bottom: 30px;
+  right: 38px;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: #b8ae9c;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+
+<div id="page-label">
+  <h1>The Growing Tree</h1>
+  <p>A living map of projects</p>
+</div>
+
+<div id="hint">Select a project to explore</div>
+<div id="project-count"></div>
+
+<div id="explorer">
+  <svg id="tree-svg" viewBox="0 0 1400 900" preserveAspectRatio="none"
+       xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="blur-xl"><feGaussianBlur stdDeviation="14"/></filter>
+      <filter id="blur-lg"><feGaussianBlur stdDeviation="9"/></filter>
+      <filter id="blur-md"><feGaussianBlur stdDeviation="5"/></filter>
+      <filter id="blur-sm"><feGaussianBlur stdDeviation="2.5"/></filter>
+    </defs>
+
+    <!-- ===== WATERCOLOUR CANOPY BACKDROP ===== -->
+    <!-- Sage / olive greens -->
+    <ellipse cx="190" cy="205" rx="165" ry="125" fill="#a4c68a" opacity="0.26" filter="url(#blur-xl)"/>
+    <ellipse cx="140" cy="250" rx="105" ry="85"  fill="#78a87a" opacity="0.20" filter="url(#blur-lg)"/>
+    <ellipse cx="270" cy="175" rx="95"  ry="80"  fill="#8aba88" opacity="0.24" filter="url(#blur-lg)"/>
+    <ellipse cx="380" cy="155" rx="120" ry="95"  fill="#aeca90" opacity="0.26" filter="url(#blur-xl)"/>
+    <ellipse cx="460" cy="200" rx="90"  ry="75"  fill="#88b480" opacity="0.22" filter="url(#blur-lg)"/>
+    <ellipse cx="640" cy="105" rx="148" ry="108" fill="#9cc882" opacity="0.28" filter="url(#blur-xl)"/>
+    <ellipse cx="710" cy="75"  rx="108" ry="85"  fill="#c0d8a4" opacity="0.20" filter="url(#blur-lg)"/>
+    <ellipse cx="565" cy="130" rx="85"  ry="68"  fill="#8cb87a" opacity="0.24" filter="url(#blur-lg)"/>
+    <ellipse cx="970" cy="170" rx="155" ry="115" fill="#96c0a4" opacity="0.27" filter="url(#blur-xl)"/>
+    <ellipse cx="1060" cy="138" rx="105" ry="82" fill="#7ea890" opacity="0.22" filter="url(#blur-lg)"/>
+    <ellipse cx="1150" cy="200" rx="115" ry="88" fill="#a6c8ae" opacity="0.24" filter="url(#blur-lg)"/>
+    <ellipse cx="1270" cy="190" rx="128" ry="96" fill="#8eb89e" opacity="0.24" filter="url(#blur-xl)"/>
+    <ellipse cx="1315" cy="235" rx="85"  ry="68" fill="#86a894" opacity="0.20" filter="url(#blur-lg)"/>
+
+    <!-- Dusty blue / teal washes -->
+    <ellipse cx="155" cy="265" rx="85"  ry="60"  fill="#88a8c8" opacity="0.17" filter="url(#blur-lg)"/>
+    <ellipse cx="295" cy="148" rx="75"  ry="58"  fill="#6e90b2" opacity="0.17" filter="url(#blur-lg)"/>
+    <ellipse cx="765" cy="95"  rx="95"  ry="72"  fill="#8eb0cc" opacity="0.18" filter="url(#blur-lg)"/>
+    <ellipse cx="1255" cy="258" rx="95" ry="72"  fill="#6888a8" opacity="0.17" filter="url(#blur-lg)"/>
+
+    <!-- Warm blush / mauve -->
+    <ellipse cx="500" cy="188" rx="65"  ry="48"  fill="#c0a0b8" opacity="0.15" filter="url(#blur-md)"/>
+
+    <!-- Warm orange accent blobs -->
+    <ellipse cx="335" cy="318" rx="42"  ry="32"  fill="#d87050" opacity="0.17" filter="url(#blur-md)"/>
+    <ellipse cx="875" cy="205" rx="38"  ry="29"  fill="#c86830" opacity="0.17" filter="url(#blur-md)"/>
+    <ellipse cx="1110" cy="318" rx="44" ry="34"  fill="#cc7040" opacity="0.14" filter="url(#blur-md)"/>
+
+    <!-- ===== DETAILED LEAF SILHOUETTES ===== -->
+    <!-- Left cluster -->
+    <path d="M 198,298 Q 163,252 182,212 Q 208,198 222,234 Q 238,268 215,295 Z" fill="#6a9068" opacity="0.52"/>
+    <path d="M 152,262 Q 118,218 138,182 Q 163,170 175,208 Q 188,245 160,260 Z" fill="#518070" opacity="0.46"/>
+    <path d="M 278,198 Q 255,150 290,126 Q 320,120 328,158 Q 336,194 302,200 Z" fill="#78aa80" opacity="0.50"/>
+    <path d="M 128,318 Q  92,282 106,248 Q 128,233 146,260 Q 160,283 145,313 Z" fill="#5a8468" opacity="0.43"/>
+    <path d="M 348,188 Q 328,146 363,123 Q 393,116 398,156 Q 403,190 366,193 Z" fill="#80a878" opacity="0.46"/>
+    <!-- Dark accent -->
+    <path d="M 238,248 Q 208,213 226,183 Q 253,173 262,206 Q 270,238 245,250 Z" fill="#3a6050" opacity="0.40"/>
+    <path d="M 368,153 Q 356,116 388,103 Q 413,100 415,128 Q 418,153 392,158 Z" fill="#2c5040" opacity="0.38"/>
+    <!-- Narrow dark leaf -->
+    <path d="M 175,215 Q 158,185 172,162 Q 190,155 198,180 Q 204,205 182,215 Z" fill="#3a6858" opacity="0.38"/>
+
+    <!-- Right cluster -->
+    <path d="M 1018,248 Q 1052,206 1086,216 Q 1110,238 1092,266 Q 1075,290 1046,273 Z" fill="#70a080" opacity="0.50"/>
+    <path d="M 1108,183 Q 1140,146 1172,160 Q 1190,186 1165,208 Q 1140,225 1116,206 Z" fill="#508878" opacity="0.46"/>
+    <path d="M  953,208 Q  986,166 1020,180 Q 1038,204 1018,226 Q  998,243  976,226 Z" fill="#78aa80" opacity="0.50"/>
+    <path d="M 1178,238 Q 1213,198 1246,216 Q 1260,243 1236,265 Q 1213,284 1190,263 Z" fill="#589070" opacity="0.46"/>
+    <path d="M 1258,198 Q 1284,160 1313,176 Q 1328,198 1306,222 Q 1285,238 1265,218 Z" fill="#68aa7e" opacity="0.40"/>
+
+    <!-- Centre leaves -->
+    <path d="M  598,128 Q  576,86  610,70 Q  640,66  646,100 Q  650,128  618,134 Z" fill="#6a9268" opacity="0.50"/>
+    <path d="M  688,103 Q  710,63  743,73 Q  763,94  743,120 Q  724,138  702,120 Z" fill="#5a8860" opacity="0.46"/>
+    <path d="M  543,156 Q  512,116  538,94 Q  566,86  576,118 Q  584,146  552,156 Z" fill="#78aa80" opacity="0.50"/>
+    <path d="M  648,78  Q  668,43  702,53 Q  720,73  700,96 Q  680,113  658,96 Z" fill="#4a7858" opacity="0.40"/>
+
+    <!-- Blue accent leaves -->
+    <path d="M 176,238 Q 146,208 158,178 Q 178,168 190,196 Q 200,223 180,240 Z" fill="#6888a8" opacity="0.36"/>
+    <path d="M 143,258 Q 113,226 130,198 Q 153,188 160,218 Q 166,246 146,260 Z" fill="#5878a0" opacity="0.30"/>
+    <path d="M 1248,258 Q 1276,222 1306,236 Q 1320,262 1296,280 Q 1273,296 1252,273 Z" fill="#6888a8" opacity="0.36"/>
+
+    <!-- ===== BOTANICAL DETAILS ===== -->
+    <!-- Dark berries / seed cluster, left -->
+    <line x1="248" y1="313" x2="230" y2="283" stroke="#4a5a40" stroke-width="1.5" opacity="0.62"/>
+    <circle cx="230" cy="278" r="5.5" fill="#1c1c1c" opacity="0.76"/>
+    <circle cx="238" cy="268" r="4.5" fill="#1c1c1c" opacity="0.66"/>
+    <circle cx="246" cy="275" r="3.5" fill="#1c1c1c" opacity="0.60"/>
+
+    <!-- Orange botanical stem, right canopy -->
+    <line x1="878" y1="242" x2="884" y2="198" stroke="#b06828" stroke-width="1.5" opacity="0.72"/>
+    <line x1="884" y1="198" x2="874" y2="181" stroke="#b06828" stroke-width="1"   opacity="0.62"/>
+    <line x1="884" y1="198" x2="898" y2="177" stroke="#b06828" stroke-width="1"   opacity="0.62"/>
+    <circle cx="874" cy="176" r="4.5" fill="#c07830" opacity="0.88"/>
+    <circle cx="898" cy="172" r="4"   fill="#c07830" opacity="0.82"/>
+    <circle cx="887" cy="165" r="3"   fill="#c07830" opacity="0.76"/>
+
+    <!-- Red bird — left -->
+    <ellipse cx="308" cy="398" rx="14" ry="8.5" fill="#c23428" opacity="0.86" transform="rotate(-12,308,398)"/>
+    <path d="M 316,393 L 330,391 L 324,398 Z" fill="#c23428" opacity="0.86"/>
+    <circle cx="302" cy="395" r="4.5" fill="#c23428" opacity="0.86"/>
+    <circle cx="299" cy="392" r="2"   fill="#181818" opacity="0.72"/>
+    <!-- Wing hint -->
+    <path d="M 304,400 Q 312,410 322,405" stroke="#a82820" stroke-width="1.2" fill="none" opacity="0.6"/>
+
+    <!-- Red bird — right canopy -->
+    <ellipse cx="1022" cy="200" rx="12" ry="7.5" fill="#c23428" opacity="0.80" transform="rotate(8,1022,200)"/>
+    <path d="M 1029,196 L 1041,194 L 1036,201 Z" fill="#c23428" opacity="0.80"/>
+    <circle cx="1016" cy="198" r="4"   fill="#c23428" opacity="0.80"/>
+    <circle cx="1013" cy="196" r="1.8" fill="#181818" opacity="0.68"/>
+
+    <!-- Fern / palm sprays, lower left -->
+    <path d="M 168,315 C 155,298 140,280 124,268" stroke="#4a6858" stroke-width="2"   fill="none" opacity="0.52" stroke-linecap="round"/>
+    <path d="M 168,315 C 152,302 140,294 133,282" stroke="#4a6858" stroke-width="1.5" fill="none" opacity="0.42" stroke-linecap="round"/>
+    <path d="M 168,315 C 172,298 170,280 160,266" stroke="#4a6858" stroke-width="1.5" fill="none" opacity="0.42" stroke-linecap="round"/>
+
+    <!-- ===== TRUNK & BRANCHES ===== -->
+    <!-- MAIN TRUNK -->
+    <path d="M 700,905 C 698,840 694,775 690,715 C 686,655 690,608 696,566 C 700,535 700,500 700,468"
+          stroke="#282424" stroke-width="34" fill="none" stroke-linecap="round" opacity="0.90"/>
+    <!-- Trunk inner highlight -->
+    <path d="M 700,905 C 703,840 707,775 711,715 C 715,655 711,608 705,566 C 701,535 701,500 700,468"
+          stroke="#3e3838" stroke-width="16" fill="none" stroke-linecap="round" opacity="0.38"/>
+
+    <!-- LEFT MAIN BRANCH: (700,492) → curves through (490,340) → (280,230) → (140,200) -->
+    <path d="M 700,492 C 668,468 622,436 568,400 C 514,364 458,332 402,302 C 360,280 306,256 262,230 C 228,210 188,205 148,202"
+          stroke="#282424" stroke-width="22" fill="none" stroke-linecap="round" opacity="0.86"/>
+    <path d="M 700,492 C 670,466 624,433 570,397 C 516,361 460,329 404,299 C 362,277 308,253 264,227 C 230,207 190,202 150,199"
+          stroke="#3e3838" stroke-width="11" fill="none" stroke-linecap="round" opacity="0.36"/>
+
+    <!-- Left sub-branch (upper) from ~(430,330) → (280,210) -->
+    <path d="M 438,335 C 400,308 352,278 298,252 C 265,236 228,222 195,212"
+          stroke="#282424" stroke-width="14" fill="none" stroke-linecap="round" opacity="0.78"/>
+
+    <!-- Left twig sprays -->
+    <path d="M 295,250 C 262,228 228,205 200,182" stroke="#282424" stroke-width="7"   fill="none" stroke-linecap="round" opacity="0.70"/>
+    <path d="M 258,232 C 228,213 196,192 172,170" stroke="#282424" stroke-width="5.5" fill="none" stroke-linecap="round" opacity="0.64"/>
+    <path d="M 210,218 C 185,202 158,184 140,166" stroke="#282424" stroke-width="4"   fill="none" stroke-linecap="round" opacity="0.58"/>
+    <path d="M 172,205 C 154,188 136,168 124,148" stroke="#282424" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.52"/>
+    <path d="M 160,200 C 146,178 145,155 148,133" stroke="#282424" stroke-width="2"   fill="none" stroke-linecap="round" opacity="0.46"/>
+
+    <!-- CENTER-LEFT BRANCH: (700,480) → (560,320) → (492,185) -->
+    <path d="M 700,480 C 678,455 648,424 614,390 C 582,358 552,324 528,290 C 510,262 498,228 494,195"
+          stroke="#282424" stroke-width="16" fill="none" stroke-linecap="round" opacity="0.82"/>
+    <path d="M 528,288 C 518,258 508,225 506,195 C 504,170 505,148 506,128"
+          stroke="#282424" stroke-width="8"   fill="none" stroke-linecap="round" opacity="0.70"/>
+    <path d="M 514,265 C 526,235 542,202 554,170 C 562,148 565,122 562,99"
+          stroke="#282424" stroke-width="6"   fill="none" stroke-linecap="round" opacity="0.64"/>
+
+    <!-- CENTER BRANCH: (700,468) → (662,295) → (638,152) → (630,72) -->
+    <path d="M 700,468 C 690,440 675,406 662,368 C 649,330 641,292 638,255 C 635,222 633,185 630,152"
+          stroke="#282424" stroke-width="17" fill="none" stroke-linecap="round" opacity="0.83"/>
+    <!-- Center sub -->
+    <path d="M 645,312 C 660,278 676,242 686,208 C 694,178 698,148 696,118"
+          stroke="#282424" stroke-width="8.5" fill="none" stroke-linecap="round" opacity="0.70"/>
+    <path d="M 630,218 C 618,188 610,156 608,128 C 607,108 610,88 614,72"
+          stroke="#282424" stroke-width="5.5" fill="none" stroke-linecap="round" opacity="0.62"/>
+
+    <!-- RIGHT-CENTER BRANCH: (700,480) → (825,348) → (970,218) -->
+    <path d="M 700,480 C 730,455 772,422 816,388 C 856,356 895,318 928,282 C 952,254 966,228 972,200"
+          stroke="#282424" stroke-width="15" fill="none" stroke-linecap="round" opacity="0.81"/>
+    <path d="M 882,312 C 908,278 938,244 960,212" stroke="#282424" stroke-width="7.5" fill="none" stroke-linecap="round" opacity="0.66"/>
+
+    <!-- RIGHT MAIN BRANCH: (700,494) → (930,362) → (1090,248) → (1290,188) -->
+    <path d="M 700,494 C 750,466 812,432 872,396 C 932,360 992,326 1044,296 C 1080,275 1118,255 1148,232 C 1188,205 1240,190 1292,184"
+          stroke="#282424" stroke-width="22" fill="none" stroke-linecap="round" opacity="0.86"/>
+    <path d="M 700,494 C 752,464 814,429 874,393 C 934,357 994,323 1046,293 C 1082,272 1120,252 1150,229 C 1190,202 1242,187 1294,181"
+          stroke="#3e3838" stroke-width="11" fill="none" stroke-linecap="round" opacity="0.36"/>
+
+    <!-- Right twig sprays -->
+    <path d="M 1200,212 C 1238,190 1272,164 1298,138" stroke="#282424" stroke-width="8"   fill="none" stroke-linecap="round" opacity="0.70"/>
+    <path d="M 1245,196 C 1270,172 1295,146 1313,120" stroke="#282424" stroke-width="5.5" fill="none" stroke-linecap="round" opacity="0.64"/>
+    <path d="M 1285,180 C 1305,158 1320,133 1324,108" stroke="#282424" stroke-width="4"   fill="none" stroke-linecap="round" opacity="0.58"/>
+    <path d="M 1318,168 C 1334,148 1348,123 1352,98"  stroke="#282424" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.52"/>
+    <path d="M 1312,165 C 1330,143 1350,118 1358,92"  stroke="#282424" stroke-width="2"   fill="none" stroke-linecap="round" opacity="0.46"/>
+
+    <!-- Thin wispy accent twigs -->
+    <path d="M 198,212 C 182,196 166,178 155,158" stroke="#282424" stroke-width="2"   fill="none" stroke-linecap="round" opacity="0.48"/>
+    <path d="M 145,205 C 130,186 118,165 114,144"  stroke="#282424" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.42"/>
+    <path d="M 975,190 C 990,166 1006,142 1015,118"  stroke="#282424" stroke-width="2"   fill="none" stroke-linecap="round" opacity="0.48"/>
+    <path d="M 632,148 C 624,124 620,98 622,75"   stroke="#282424" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.54"/>
+
+    <!-- ===== PROJECT CARDS (foreignObject) ===== -->
+
+    <!-- Card 1 : Echoes of Memory — far left, x=80 y=178 -->
+    <foreignObject x="80" y="178" width="120" height="160">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="project-card" data-id="1"></div>
+    </foreignObject>
+
+    <!-- Card 2 : The Empathy Engine — center-left, x=428 y=148 -->
+    <foreignObject x="428" y="148" width="120" height="160">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="project-card" data-id="2"></div>
+    </foreignObject>
+
+    <!-- Card 3 : Cartography of Dreams — centre top, x=590 y=52 -->
+    <foreignObject x="590" y="52" width="120" height="160">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="project-card" data-id="3"></div>
+    </foreignObject>
+
+    <!-- Card 4 : Roots & Algorithms — right, x=928 y=158 -->
+    <foreignObject x="928" y="158" width="120" height="160">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="project-card" data-id="4"></div>
+    </foreignObject>
+
+    <!-- Card 5 : The Listening Archive — far right, x=1240 y=138 -->
+    <foreignObject x="1240" y="138" width="120" height="160">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="project-card" data-id="5"></div>
+    </foreignObject>
+
+  </svg>
+</div>
+
+<!-- Dim overlay -->
+<div id="overlay"></div>
+
+<!-- Detail panel -->
+<div id="detail-panel">
+  <button class="close-btn" id="close-btn">&#x2715;</button>
+  <div id="detail-cover-wrap"></div>
+  <h2 id="detail-title"></h2>
+  <span class="detail-tag" id="detail-tag"></span>
+  <p id="detail-desc"></p>
+  <p id="detail-body"></p>
+  <button class="explore-btn">Explore Project &rarr;</button>
+</div>
+
+<script>
+/* ─── Project data ─────────────────────────────────────────── */
+const PROJECTS = [
+  {
+    id: 1,
+    title: "Echoes of Memory",
+    tag: "Memory & Identity",
+    tagBg: "#ddeedd", tagFg: "#2a5a32",
+    desc: "An exploration of how artificial intelligence can preserve, reconstruct, and reimagine human memory — blurring the boundary between lived experience and digital recollection.",
+    body: "What remains of us when we are gone? This project investigates the fragile architecture of memory through AI systems that learn from personal archives, letters, and photographs.",
+    makeCover(w, h) {
+      const s = (v) => (v * w / 120).toFixed(1);
+      const t = (v) => (v * h / 160).toFixed(1);
+      return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+        <rect width="${w}" height="${h}" fill="#6e9880"/>
+        <ellipse cx="${w*.5}" cy="${h*.46}" rx="${w*.42}" ry="${h*.44}" fill="#3e5e4e" opacity="0.28"/>
+        <ellipse cx="${w*.5}" cy="${h*.42}" rx="${w*.27}" ry="${h*.34}" fill="#e2d09a" opacity="0.42"/>
+        <!-- head -->
+        <ellipse cx="${w*.5}" cy="${h*.31}" rx="${w*.145}" ry="${w*.145}" fill="#e2d09a" opacity="0.68"/>
+        <!-- body -->
+        <path d="M ${w*.37},${h*.42} Q ${w*.36},${h*.62} ${w*.38},${h*.72} L ${w*.62},${h*.72} Q ${w*.64},${h*.62} ${w*.63},${h*.42} Z"
+              fill="#e2d09a" opacity="0.55"/>
+        <!-- data rays -->
+        <line x1="${w*.26}" y1="${h*.38}" x2="${w*.04}" y2="${h*.27}" stroke="#bcd8a8" stroke-width="1" opacity="0.6"/>
+        <line x1="${w*.26}" y1="${h*.46}" x2="${w*.02}" y2="${h*.49}" stroke="#bcd8a8" stroke-width="1" opacity="0.5"/>
+        <line x1="${w*.74}" y1="${h*.38}" x2="${w*.96}" y2="${h*.29}" stroke="#bcd8a8" stroke-width="1" opacity="0.6"/>
+        <line x1="${w*.74}" y1="${h*.46}" x2="${w*.98}" y2="${h*.49}" stroke="#bcd8a8" stroke-width="1" opacity="0.5"/>
+        <line x1="${w*.5}"  y1="${h*.17}" x2="${w*.5}"  y2="${h*.03}" stroke="#bcd8a8" stroke-width="1" opacity="0.6"/>
+        <circle cx="${w*.04}" cy="${h*.27}" r="${w*.026}" fill="#bcd8a8" opacity="0.78"/>
+        <circle cx="${w*.02}" cy="${h*.49}" r="${w*.022}" fill="#bcd8a8" opacity="0.68"/>
+        <circle cx="${w*.96}" cy="${h*.29}" r="${w*.026}" fill="#bcd8a8" opacity="0.78"/>
+        <circle cx="${w*.98}" cy="${h*.49}" r="${w*.022}" fill="#bcd8a8" opacity="0.68"/>
+        <!-- memory rings -->
+        <circle cx="${w*.5}" cy="${h*.46}" r="${w*.44}" fill="none" stroke="#bcd8a8" stroke-width="0.8" opacity="0.22"/>
+        <circle cx="${w*.5}" cy="${h*.46}" r="${w*.34}" fill="none" stroke="#bcd8a8" stroke-width="0.8" opacity="0.18"/>
+        <circle cx="${w*.5}" cy="${h*.46}" r="${w*.55}" fill="none" stroke="#bcd8a8" stroke-width="0.5" opacity="0.12"/>
+        <!-- title bar -->
+        <rect x="0" y="${h*.82}" width="${w}" height="${h*.18}" fill="#3e5e4e" opacity="0.84"/>
+        <text x="${w*.5}" y="${h*.9}"  font-family="Georgia,serif" font-size="${(w*.072).toFixed(1)}" fill="#e2d09a" text-anchor="middle">ECHOES OF</text>
+        <text x="${w*.5}" y="${h*.97}" font-family="Georgia,serif" font-size="${(w*.072).toFixed(1)}" fill="#e2d09a" text-anchor="middle">MEMORY</text>
+      </svg>`;
+    }
+  },
+  {
+    id: 2,
+    title: "The Empathy Engine",
+    tag: "Emotion & Connection",
+    tagBg: "#f2e0ec", tagFg: "#8a2860",
+    desc: "A study in machine emotion — can artificial systems genuinely understand human feeling, or only mirror it? This project builds tools that respond to the emotional texture of language.",
+    body: "Trained on decades of human correspondence, the engine learns the weight of silence, the curve of hesitation, the warmth between the lines.",
+    makeCover(w, h) {
+      return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+        <rect width="${w}" height="${h}" fill="#be7898"/>
+        <ellipse cx="${w*.5}" cy="${h*.48}" rx="${w*.46}" ry="${h*.46}" fill="#f4dce8" opacity="0.26"/>
+        <!-- heart -->
+        <path d="M ${w*.5},${h*.63} C ${w*.11},${h*.45} ${w*.11},${h*.23} ${w*.3},${h*.17}
+                 C ${w*.4},${h*.13} ${w*.48},${h*.2} ${w*.5},${h*.27}
+                 C ${w*.52},${h*.2} ${w*.6},${h*.13} ${w*.7},${h*.17}
+                 C ${w*.89},${h*.23} ${w*.89},${h*.45} ${w*.5},${h*.63} Z"
+              fill="#8a3060" opacity="0.74"/>
+        <!-- circuit leads -->
+        <path d="M ${w*.5},${h*.27} L ${w*.5},${h*.1} L ${w*.36},${h*.1} L ${w*.36},${h*.04}"
+              stroke="#f4dce8" stroke-width="1.5" fill="none" opacity="0.65"/>
+        <path d="M ${w*.5},${h*.27} L ${w*.5},${h*.1} L ${w*.64},${h*.1} L ${w*.64},${h*.03}"
+              stroke="#f4dce8" stroke-width="1.5" fill="none" opacity="0.65"/>
+        <circle cx="${w*.36}" cy="${h*.04}" r="3" fill="#f4dce8" opacity="0.84"/>
+        <circle cx="${w*.64}" cy="${h*.03}" r="3" fill="#f4dce8" opacity="0.84"/>
+        <path d="M ${w*.21},${h*.42} L ${w*.06},${h*.42} L ${w*.06},${h*.5} L ${w*.01},${h*.5}"
+              stroke="#f4dce8" stroke-width="1.5" fill="none" opacity="0.65"/>
+        <path d="M ${w*.79},${h*.42} L ${w*.94},${h*.42} L ${w*.94},${h*.5} L ${w*.99},${h*.5}"
+              stroke="#f4dce8" stroke-width="1.5" fill="none" opacity="0.65"/>
+        <!-- pulse wave -->
+        <path d="M ${w*.08},${h*.77} L ${w*.2},${h*.77} L ${w*.27},${h*.67} L ${w*.36},${h*.86}
+                 L ${w*.44},${h*.71} L ${w*.5},${h*.78} L ${w*.56},${h*.73} L ${w*.93},${h*.73}"
+              stroke="#8a3060" stroke-width="2" fill="none" opacity="0.86"/>
+        <rect x="0" y="${h*.85}" width="${w}" height="${h*.15}" fill="#8a3060" opacity="0.80"/>
+        <text x="${w*.5}" y="${h*.92}" font-family="Georgia,serif" font-size="${(w*.066).toFixed(1)}" fill="#f4dce8" text-anchor="middle">THE EMPATHY</text>
+        <text x="${w*.5}" y="${h*.99}" font-family="Georgia,serif" font-size="${(w*.066).toFixed(1)}" fill="#f4dce8" text-anchor="middle">ENGINE</text>
+      </svg>`;
+    }
+  },
+  {
+    id: 3,
+    title: "Cartography of Dreams",
+    tag: "Mind & Mapping",
+    tagBg: "#e0e0f8", tagFg: "#32328a",
+    desc: "Dreams resist translation. This project attempts to map the unmappable — creating navigable landscapes from the symbolic language of the subconscious mind.",
+    body: "Using language models trained on dream journals collected across cultures, the system generates unique topographies of the sleeping mind — each map unrepeatable.",
+    makeCover(w, h) {
+      return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+        <rect width="${w}" height="${h}" fill="#6468b0"/>
+        <rect x="0" y="${h*.38}" width="${w}" height="${h*.62}" fill="#36368a" opacity="0.48"/>
+        <!-- topo lines -->
+        <path d="M 0,${h*.42} C ${w*.15},${h*.31} ${w*.32},${h*.47} ${w*.5},${h*.36} C ${w*.68},${h*.25} ${w*.85},${h*.43} ${w},${h*.36}"
+              stroke="#9ea8e0" stroke-width="1.5" fill="none" opacity="0.60"/>
+        <path d="M 0,${h*.5}  C ${w*.12},${h*.38} ${w*.35},${h*.53} ${w*.5},${h*.42} C ${w*.65},${h*.31} ${w*.88},${h*.49} ${w},${h*.41}"
+              stroke="#9ea8e0" stroke-width="1.5" fill="none" opacity="0.52"/>
+        <path d="M 0,${h*.58} C ${w*.15},${h*.46} ${w*.38},${h*.63} ${w*.5},${h*.5}  C ${w*.62},${h*.37} ${w*.85},${h*.57} ${w},${h*.49}"
+              stroke="#9ea8e0" stroke-width="1"   fill="none" opacity="0.44"/>
+        <path d="M 0,${h*.66} C ${w*.18},${h*.54} ${w*.4},${h*.71}  ${w*.5},${h*.6}  C ${w*.6},${h*.49} ${w*.82},${h*.67} ${w},${h*.58}"
+              stroke="#9ea8e0" stroke-width="1"   fill="none" opacity="0.36"/>
+        <path d="M 0,${h*.74} C ${w*.2},${h*.62}  ${w*.42},${h*.79} ${w*.5},${h*.68} C ${w*.58},${h*.57} ${w*.8},${h*.75}  ${w},${h*.66}"
+              stroke="#9ea8e0" stroke-width="0.8" fill="none" opacity="0.30"/>
+        <!-- moon -->
+        <circle cx="${w*.67}" cy="${h*.2}"  r="${w*.17}" fill="#d8d8f8" opacity="0.54"/>
+        <circle cx="${w*.75}" cy="${h*.15}" r="${w*.145}" fill="#6468b0" opacity="0.96"/>
+        <!-- stars -->
+        <circle cx="${w*.12}" cy="${h*.14}" r="1.8" fill="#d8d8f8" opacity="0.84"/>
+        <circle cx="${w*.3}"  cy="${h*.09}" r="1.4" fill="#d8d8f8" opacity="0.74"/>
+        <circle cx="${w*.43}" cy="${h*.18}" r="1.8" fill="#d8d8f8" opacity="0.84"/>
+        <circle cx="${w*.1}"  cy="${h*.26}" r="1"   fill="#d8d8f8" opacity="0.66"/>
+        <circle cx="${w*.24}" cy="${h*.29}" r="1"   fill="#d8d8f8" opacity="0.56"/>
+        <!-- compass -->
+        <circle cx="${w*.22}" cy="${h*.5}"  r="${w*.15}" fill="none" stroke="#9ea8e0" stroke-width="1" opacity="0.50"/>
+        <line x1="${w*.22}" y1="${h*.35}" x2="${w*.22}" y2="${h*.65}" stroke="#9ea8e0" stroke-width="1" opacity="0.56"/>
+        <line x1="${w*.07}" y1="${h*.5}"  x2="${w*.37}" y2="${h*.5}"  stroke="#9ea8e0" stroke-width="1" opacity="0.56"/>
+        <polygon points="${w*.22},${h*.35} ${w*.19},${h*.41} ${w*.25},${h*.41}" fill="#9ea8e0" opacity="0.72"/>
+        <rect x="0" y="${h*.84}" width="${w}" height="${h*.16}" fill="#36368a" opacity="0.84"/>
+        <text x="${w*.5}" y="${h*.91}" font-family="Georgia,serif" font-size="${(w*.066).toFixed(1)}" fill="#d8d8f8" text-anchor="middle">CARTOGRAPHY</text>
+        <text x="${w*.5}" y="${h*.98}" font-family="Georgia,serif" font-size="${(w*.066).toFixed(1)}" fill="#d8d8f8" text-anchor="middle">OF DREAMS</text>
+      </svg>`;
+    }
+  },
+  {
+    id: 4,
+    title: "Roots & Algorithms",
+    tag: "Nature & Systems",
+    tagBg: "#daf0cc", tagFg: "#285a1e",
+    desc: "Nature has been computing longer than we have. This project draws parallels between biological growth systems and machine learning — finding the forest in the neural network.",
+    body: "Fractal geometry, mycelial networks, and evolutionary algorithms converge in a living visualization that grows differently each time it runs.",
+    makeCover(w, h) {
+      return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+        <rect width="${w}" height="${h}" fill="#587a46"/>
+        <rect x="0" y="${h*.52}" width="${w}" height="${h*.48}" fill="#385a2e" opacity="0.44"/>
+        <!-- trunk -->
+        <rect x="${w*.46}" y="${h*.38}" width="${w*.08}" height="${h*.32}" fill="#385a2e" opacity="0.86" rx="3"/>
+        <circle cx="${w*.5}" cy="${h*.36}" r="${w*.046}" fill="#d2e8b4" opacity="0.84"/>
+        <!-- network nodes -->
+        <line x1="${w*.5}" y1="${h*.36}" x2="${w*.3}"  y2="${h*.2}"  stroke="#9ec87a" stroke-width="1.5" opacity="0.76"/>
+        <line x1="${w*.5}" y1="${h*.36}" x2="${w*.68}" y2="${h*.17}" stroke="#9ec87a" stroke-width="1.5" opacity="0.76"/>
+        <line x1="${w*.5}" y1="${h*.36}" x2="${w*.5}"  y2="${h*.16}" stroke="#9ec87a" stroke-width="1.5" opacity="0.76"/>
+        <circle cx="${w*.3}"  cy="${h*.2}"  r="${w*.038}" fill="#9ec87a" opacity="0.86"/>
+        <circle cx="${w*.68}" cy="${h*.17}" r="${w*.038}" fill="#9ec87a" opacity="0.86"/>
+        <circle cx="${w*.5}"  cy="${h*.16}" r="${w*.038}" fill="#9ec87a" opacity="0.86"/>
+        <line x1="${w*.3}"  y1="${h*.2}"  x2="${w*.16}" y2="${h*.09}" stroke="#9ec87a" stroke-width="1" opacity="0.56"/>
+        <line x1="${w*.3}"  y1="${h*.2}"  x2="${w*.38}" y2="${h*.07}" stroke="#9ec87a" stroke-width="1" opacity="0.56"/>
+        <line x1="${w*.68}" y1="${h*.17}" x2="${w*.58}" y2="${h*.06}" stroke="#9ec87a" stroke-width="1" opacity="0.56"/>
+        <line x1="${w*.68}" y1="${h*.17}" x2="${w*.80}" y2="${h*.07}" stroke="#9ec87a" stroke-width="1" opacity="0.56"/>
+        <circle cx="${w*.16}" cy="${h*.09}" r="${w*.024}" fill="#9ec87a" opacity="0.68"/>
+        <circle cx="${w*.38}" cy="${h*.07}" r="${w*.024}" fill="#9ec87a" opacity="0.68"/>
+        <circle cx="${w*.58}" cy="${h*.06}" r="${w*.024}" fill="#9ec87a" opacity="0.68"/>
+        <circle cx="${w*.80}" cy="${h*.07}" r="${w*.024}" fill="#9ec87a" opacity="0.68"/>
+        <!-- roots -->
+        <path d="M ${w*.5},${h*.7}  C ${w*.37},${h*.77} ${w*.24},${h*.83} ${w*.13},${h*.92}" stroke="#385a2e" stroke-width="3"   fill="none" opacity="0.72" stroke-linecap="round"/>
+        <path d="M ${w*.5},${h*.7}  C ${w*.44},${h*.81} ${w*.40},${h*.89} ${w*.38},${h*.99}" stroke="#385a2e" stroke-width="2.5" fill="none" opacity="0.65" stroke-linecap="round"/>
+        <path d="M ${w*.5},${h*.7}  C ${w*.63},${h*.77} ${w*.75},${h*.84} ${w*.87},${h*.94}" stroke="#385a2e" stroke-width="3"   fill="none" opacity="0.72" stroke-linecap="round"/>
+        <path d="M ${w*.5},${h*.72} C ${w*.61},${h*.81} ${w*.73},${h*.88} ${w*.83},${h*.97}" stroke="#385a2e" stroke-width="2"   fill="none" opacity="0.55" stroke-linecap="round"/>
+        <path d="M ${w*.5},${h*.72} C ${w*.37},${h*.84} ${w*.29},${h*.94} ${w*.21},${h*.99}" stroke="#385a2e" stroke-width="2"   fill="none" opacity="0.55" stroke-linecap="round"/>
+        <rect x="0" y="${h*.84}" width="${w}" height="${h*.16}" fill="#385a2e" opacity="0.86"/>
+        <text x="${w*.5}" y="${h*.91}" font-family="Georgia,serif" font-size="${(w*.068).toFixed(1)}" fill="#d2e8b4" text-anchor="middle">ROOTS &amp;</text>
+        <text x="${w*.5}" y="${h*.98}" font-family="Georgia,serif" font-size="${(w*.068).toFixed(1)}" fill="#d2e8b4" text-anchor="middle">ALGORITHMS</text>
+      </svg>`;
+    }
+  },
+  {
+    id: 5,
+    title: "The Listening Archive",
+    tag: "Voice & Preservation",
+    tagBg: "#f5e8d4", tagFg: "#7a4e10",
+    desc: "Every voice carries a world. This project collects, transcribes, and weaves together oral histories from the margins — voices that risk being lost to time.",
+    body: "An AI archivist that not only preserves sound but understands context — linking stories across languages, geographies, and generations into a living tapestry of human experience.",
+    makeCover(w, h) {
+      return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+        <rect width="${w}" height="${h}" fill="#ac8438"/>
+        <ellipse cx="${w*.5}" cy="${h*.48}" rx="${w*.46}" ry="${h*.46}" fill="#f4e6be" opacity="0.22"/>
+        <!-- ear -->
+        <path d="M ${w*.38},${h*.34} C ${w*.24},${h*.34} ${w*.17},${h*.42} ${w*.17},${h*.5}
+                 C ${w*.17},${h*.58} ${w*.24},${h*.69} ${w*.38},${h*.71}
+                 C ${w*.41},${h*.71} ${w*.43},${h*.69} ${w*.43},${h*.66}
+                 C ${w*.43},${h*.6}  ${w*.38},${h*.58} ${w*.36},${h*.55}
+                 C ${w*.31},${h*.49} ${w*.31},${h*.44} ${w*.36},${h*.41}
+                 C ${w*.39},${h*.37} ${w*.44},${h*.36} ${w*.47},${h*.4}"
+              stroke="#7c5818" stroke-width="3" fill="none" opacity="0.84" stroke-linecap="round"/>
+        <!-- sound lines -->
+        <line x1="${w*.47}" y1="${h*.44}" x2="${w*.63}" y2="${h*.39}" stroke="#7c5818" stroke-width="1.5" fill="none" opacity="0.64" stroke-linecap="round"/>
+        <line x1="${w*.47}" y1="${h*.5}"  x2="${w*.66}" y2="${h*.5}"  stroke="#7c5818" stroke-width="1.5" fill="none" opacity="0.58" stroke-linecap="round"/>
+        <line x1="${w*.47}" y1="${h*.56}" x2="${w*.63}" y2="${h*.61}" stroke="#7c5818" stroke-width="1.5" fill="none" opacity="0.54" stroke-linecap="round"/>
+        <circle cx="${w*.47}" cy="${h*.44}" r="${w*.026}" fill="#7c5818" opacity="0.84"/>
+        <circle cx="${w*.47}" cy="${h*.5}"  r="${w*.026}" fill="#7c5818" opacity="0.84"/>
+        <circle cx="${w*.47}" cy="${h*.56}" r="${w*.026}" fill="#7c5818" opacity="0.84"/>
+        <line x1="${w*.47}" y1="${h*.44}" x2="${w*.47}" y2="${h*.56}" stroke="#7c5818" stroke-width="1" opacity="0.54"/>
+        <!-- birds (sound becomes flight) -->
+        <path d="M ${w*.6},${h*.27}  C ${w*.63},${h*.21} ${w*.7},${h*.19}  ${w*.74},${h*.22} C ${w*.78},${h*.19}  ${w*.84},${h*.18} ${w*.86},${h*.22}"
+              stroke="#7c5818" stroke-width="2"   fill="none" opacity="0.84" stroke-linecap="round"/>
+        <path d="M ${w*.72},${h*.17} C ${w*.75},${h*.11} ${w*.82},${h*.09} ${w*.86},${h*.12} C ${w*.9},${h*.09}  ${w*.94},${h*.08} ${w*.96},${h*.12}"
+              stroke="#7c5818" stroke-width="1.5" fill="none" opacity="0.74" stroke-linecap="round"/>
+        <path d="M ${w*.48},${h*.19} C ${w*.51},${h*.13} ${w*.58},${h*.11} ${w*.62},${h*.14} C ${w*.66},${h*.11} ${w*.72},${h*.1}  ${w*.74},${h*.14}"
+              stroke="#7c5818" stroke-width="1.5" fill="none" opacity="0.72" stroke-linecap="round"/>
+        <rect x="0" y="${h*.84}" width="${w}" height="${h*.16}" fill="#7c5818" opacity="0.86"/>
+        <text x="${w*.5}" y="${h*.91}" font-family="Georgia,serif" font-size="${(w*.066).toFixed(1)}" fill="#f4e6be" text-anchor="middle">LISTENING</text>
+        <text x="${w*.5}" y="${h*.98}" font-family="Georgia,serif" font-size="${(w*.066).toFixed(1)}" fill="#f4e6be" text-anchor="middle">ARCHIVE</text>
+      </svg>`;
+    }
+  }
+];
+
+/* ─── Render card thumbnails ──────────────────────────────── */
+function renderCards() {
+  PROJECTS.forEach(p => {
+    const el = document.querySelector(`.project-card[data-id="${p.id}"]`);
+    if (el) el.innerHTML = p.makeCover(120, 160);
+  });
+}
+
+/* ─── Detail panel ────────────────────────────────────────── */
+function openDetail(id) {
+  const p = PROJECTS.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('detail-cover-wrap').innerHTML = p.makeCover(360, 480);
+  document.getElementById('detail-title').textContent = p.title;
+  const tag = document.getElementById('detail-tag');
+  tag.textContent = p.tag;
+  tag.style.background = p.tagBg;
+  tag.style.color      = p.tagFg;
+  document.getElementById('detail-desc').textContent = p.desc;
+  document.getElementById('detail-body').textContent = p.body;
+  document.getElementById('detail-panel').classList.add('open');
+  document.getElementById('overlay').classList.add('visible');
+}
+
+function closeDetail() {
+  document.getElementById('detail-panel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('visible');
+}
+
+/* ─── Wire up events ──────────────────────────────────────── */
+document.getElementById('close-btn').addEventListener('click', closeDetail);
+document.getElementById('overlay').addEventListener('click', closeDetail);
+
+// Delegate clicks from foreignObject cards
+document.getElementById('tree-svg').addEventListener('click', e => {
+  const card = e.target.closest('.project-card');
+  if (card) openDetail(Number(card.dataset.id));
+});
+
+/* ─── Initialise ─────────────────────────────────────────── */
+renderCards();
+document.getElementById('project-count').textContent = `${PROJECTS.length} projects`;
+
+/*
+ * To add a new project:
+ * 1. Push a new object into PROJECTS (give it the next id).
+ * 2. Add a <foreignObject> block in the SVG at a suitable branch position.
+ * 3. The card will render automatically via renderCards().
+ */
+</script>
+</body>
+</html>
