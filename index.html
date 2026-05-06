@@ -740,7 +740,7 @@ function buildRiver(allPts) {
   ];
   frays.forEach(f => {
     const el = path(spline(oshift(allPts, f.dx, f.dy)), {
-      stroke:'#78a8cc', 'stroke-width':f.w, opacity:f.op, 'stroke-dasharray':f.dash
+      stroke:'#1c3a8a', 'stroke-width':f.w, opacity:f.op, 'stroke-dasharray':f.dash
     });
     el.classList.add(f.cls);
     layer.appendChild(el);
