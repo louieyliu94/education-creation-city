@@ -154,7 +154,7 @@ body {
   font-size: 11px; font-style: italic; color: #b0a898;
   margin-top: 8px; margin-bottom: 14px; text-align: center; display: none;
 }
-#modal-card.paged #modal-cover-wrap { aspect-ratio: unset; height: 260px; margin-bottom: 14px; }
+#modal-card.paged #modal-cover-wrap { aspect-ratio: unset; height: 280px; margin-bottom: 14px; overflow: hidden; }
 #modal-card.paged #modal-title { font-size: 20px; margin-bottom: 6px; }
 #modal-card.paged #modal-tag  { margin-bottom: 14px; }
 #modal-card.paged #modal-desc { display: none; }
@@ -292,24 +292,7 @@ const PROJECTS = [
         heading:"The Project",
         caption:"IB Theatre Arts, Grade 10 — 2024",
         body:"A class of Grade 10 students adapted the ancient myth of Sisyphus into a contemporary two-act play, guided by Camus's essay The Myth of Sisyphus. The production asks: can repetition become rebellion? Is the struggle itself the answer?",
-        photo(w,h){return`<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
-          <rect width="${w}" height="${h}" fill="#16103c"/>
-          <rect x="0" y="0" width="${w}" height="${h*.055}" fill="#221850" opacity="0.9"/>
-          <rect x="0" y="${h*.945}" width="${w}" height="${h*.055}" fill="#221850" opacity="0.9"/>
-          ${[0,1,2,3,4,5,6,7].map(i=>`<rect x="${w*(.04+i*.118)}" y="${h*.01}" width="${w*.068}" height="${h*.018}" fill="#8070c0" opacity="0.45" rx="1"/>`).join('')}
-          ${[0,1,2,3,4,5,6,7].map(i=>`<rect x="${w*(.04+i*.118)}" y="${h*.972}" width="${w*.068}" height="${h*.018}" fill="#8070c0" opacity="0.45" rx="1"/>`).join('')}
-          <rect x="${w*.038}" y="0" width="${w*.016}" height="${h}" fill="#1e1648" opacity="0.8"/>
-          <rect x="${w*.946}" y="0" width="${w*.016}" height="${h}" fill="#1e1648" opacity="0.8"/>
-          <text x="${w*.5}" y="${h*.24}" font-family="Georgia,serif" font-size="${(w*.024).toFixed(1)}" fill="#8070c0" text-anchor="middle" letter-spacing="3">THEATRE PRODUCTION</text>
-          <line x1="${w*.14}" y1="${h*.30}" x2="${w*.86}" y2="${h*.30}" stroke="#4030a0" stroke-width="0.8" opacity="0.7"/>
-          <text x="${w*.5}" y="${h*.44}" font-family="Georgia,serif" font-size="${(w*.074).toFixed(1)}" fill="#ddd0f8" text-anchor="middle">The Weight</text>
-          <text x="${w*.5}" y="${h*.57}" font-family="Georgia,serif" font-size="${(w*.074).toFixed(1)}" fill="#ddd0f8" text-anchor="middle">of Meaning</text>
-          <line x1="${w*.14}" y1="${h*.63}" x2="${w*.86}" y2="${h*.63}" stroke="#4030a0" stroke-width="0.8" opacity="0.7"/>
-          <text x="${w*.5}" y="${h*.72}" font-family="Georgia,serif" font-size="${(w*.022).toFixed(1)}" fill="#8070c0" text-anchor="middle" letter-spacing="1.5">A REWORKING OF THE MYTH OF SISYPHUS</text>
-          <circle cx="${w*.5}" cy="${h*.84}" r="${w*.03}" fill="#4a3888" opacity="0.8"/>
-          <path d="M ${w*.47},${h*.88} L ${w*.5},${h*.84} L ${w*.53},${h*.88}" fill="none" stroke="#4a3888" stroke-width="1.2" opacity="0.7"/>
-          <text x="${w*.5}" y="${h*.95}" font-family="'Helvetica Neue',Arial,sans-serif" font-size="${(w*.019).toFixed(1)}" fill="#5848a0" text-anchor="middle" letter-spacing="1.5">GRADE 10 · IB THEATRE ARTS · 2024</text>
-        </svg>`;}
+        photo(w,h){return`<img src="assets/sisyphus.webp" style="width:100%;height:100%;object-fit:cover;display:block;">`;}
       },
       {
         heading:"Research: The Absurd",
