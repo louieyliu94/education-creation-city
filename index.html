@@ -61,6 +61,11 @@ body {
 .card-face[data-stone="8"]  { clip-path: path('M 36,8 C 55,2 76,18 77,41 C 79,63 67,86 46,92 C 24,99 0,89 -4,66 C -8,44 2,21 18,11 C 33,-1 16,14 36,8 Z'); }
 .card-face[data-stone="9"]  { clip-path: path('M 36,6 C 50,2 68,15 72,36 C 75,57 68,79 50,89 C 33,99 11,94 5,73 C -2,52 3,31 15,16 C 26,2 21,11 36,6 Z'); }
 .card-face[data-stone="10"] { clip-path: path('M 39,5 C 57,0 77,15 79,37 C 81,60 69,84 49,92 C 28,100 5,92 0,70 C -5,47 4,24 16,13 C 28,-1 21,10 39,5 Z'); }
+.card-face[data-stone="11"] { clip-path: path('M 38,5 C 58,-2 80,10 83,35 C 86,60 78,88 54,97 C 30,106 4,97 -2,70 C -8,43 2,17 18,7 C 34,-3 18,12 38,5 Z'); }
+.card-face[data-stone="12"] { clip-path: path('M 40,3 C 62,-4 85,13 86,40 C 87,67 75,94 50,103 C 25,112 -4,101 -4,73 C -4,45 8,18 24,6 C 40,-6 18,10 40,3 Z'); }
+.card-face[data-stone="13"] { clip-path: path('M 34,7 C 54,0 75,15 78,42 C 81,69 67,93 43,101 C 19,109 -4,98 -4,70 C -4,42 8,17 18,8 C 28,-1 14,14 34,7 Z'); }
+.card-face[data-stone="14"] { clip-path: path('M 42,4 C 65,-4 89,15 88,44 C 87,73 73,99 47,107 C 21,115 -4,101 -4,72 C -4,43 8,15 24,5 C 40,-5 19,12 42,4 Z'); }
+.card-face[data-stone="15"] { clip-path: path('M 36,6 C 58,0 82,17 84,46 C 86,75 71,100 45,107 C 19,114 -5,101 -3,72 C -1,43 9,18 22,8 C 35,-2 14,12 36,6 Z'); }
 
 .card-wrap:hover .card-inner { filter: drop-shadow(0 3px 10px rgba(10,20,40,0.26)); }
 .card-wrap:hover .card-inner:hover {
@@ -240,6 +245,7 @@ body {
 <ellipse cx="1315" cy="78"  rx="90"  ry="52"  fill="#ccbc8a" opacity="0.20" filter="url(#blur-lg)"/>
 
 <!-- dynamic layers injected by JS -->
+<g id="mountain-layer"></g>
 <g id="river-layer"></g>
 <g id="nature-layer"></g>
 <g id="island-layer"></g>
@@ -272,17 +278,17 @@ body {
 const SVG_NS   = 'http://www.w3.org/2000/svg';
 const XHTML_NS = 'http://www.w3.org/1999/xhtml';
 
-const SRC  = { x: 24,   y: 916 };
-const DEST = { x: 1388, y: 8   };
+const SRC  = { x: 60,   y: 880 };
+const DEST = { x: 1100, y: 15  };
 
 /* River perpendicular unit vectors (upper-left bank / lower-right bank) */
 const LX = -0.554, LY = -0.832; /* upper-left bank */
 const RX =  0.554, RY =  0.832; /* lower-right bank */
 
-/* ── 10 projects — ix,iy = island centre ─────────── */
+/* ── 15 projects — ix,iy = island centre ─────────── */
 const PROJECTS = [
   {
-    id:1, ix:128, iy:838,
+    id:1, ix:150,  iy:840,
     title:"The Weight of Meaning", tag:"Theatre & Existentialism",
     tagBg:"#ece0f8", tagFg:"#2e1a5e",
     desc:"A Grade 10 theatre production reworking the myth of Sisyphus through an existentialist lens — exploring meaninglessness, rebellion, and the absurd.",
@@ -464,7 +470,7 @@ const PROJECTS = [
     </svg>`;}
   },
   {
-    id:2, ix:302,  iy:752,
+    id:2, ix:300,  iy:800,
     title:"The Empathy Engine", tag:"Emotion & Connection",
     tagBg:"#f2e0ec", tagFg:"#8a2860",
     desc:"A study in machine emotion — can artificial systems genuinely understand human feeling, or only mirror it? This project builds tools that respond to the emotional texture of language.",
@@ -484,7 +490,7 @@ const PROJECTS = [
       <text x="${w*.5}" y="${h*.985}" font-family="Georgia,serif" font-size="${(w*.063).toFixed(1)}" fill="#f4dce8" text-anchor="middle">ENGINE</text></svg>`;}
   },
   {
-    id:3, ix:378,  iy:664,
+    id:3, ix:500,  iy:775,
     title:"Cartography of Dreams", tag:"Mind & Mapping",
     tagBg:"#e0e0f8", tagFg:"#32328a",
     desc:"Dreams resist translation. This project attempts to map the unmappable — creating navigable landscapes from the symbolic language of the subconscious mind.",
@@ -509,7 +515,7 @@ const PROJECTS = [
       <text x="${w*.5}" y="${h*.98}" font-family="Georgia,serif" font-size="${(w*.063).toFixed(1)}" fill="#d8d8f8" text-anchor="middle">OF DREAMS</text></svg>`;}
   },
   {
-    id:4, ix:548,  iy:588,
+    id:4, ix:700,  iy:755,
     title:"Roots & Algorithms", tag:"Nature & Systems",
     tagBg:"#daf0cc", tagFg:"#285a1e",
     desc:"Nature has been computing longer than we have. This project draws parallels between biological growth systems and machine learning — finding the forest in the neural network.",
@@ -535,7 +541,7 @@ const PROJECTS = [
       <text x="${w*.5}" y="${h*.98}" font-family="Georgia,serif" font-size="${(w*.065).toFixed(1)}" fill="#d2e8b4" text-anchor="middle">ALGORITHMS</text></svg>`;}
   },
   {
-    id:5, ix:626,  iy:502,
+    id:5, ix:870,  iy:715,
     title:"The Listening Archive", tag:"Voice & Preservation",
     tagBg:"#f5e8d4", tagFg:"#7a4e10",
     desc:"Every voice carries a world. This project collects, transcribes, and weaves together oral histories from the margins — voices that risk being lost to time.",
@@ -556,7 +562,7 @@ const PROJECTS = [
       <text x="${w*.5}" y="${h*.98}" font-family="Georgia,serif" font-size="${(w*.063).toFixed(1)}" fill="#f4e6be" text-anchor="middle">ARCHIVE</text></svg>`;}
   },
   {
-    id:6, ix:794,  iy:424,
+    id:6, ix:1000,  iy:635,
     title:"Second Language", tag:"Language & Identity",
     tagBg:"#f0e8d4", tagFg:"#6a5030",
     desc:"Identity shifts in translation. This project explores the self that emerges in a second language — the gaps, gains, and unexpected freedoms of living between tongues.",
@@ -576,7 +582,7 @@ const PROJECTS = [
       <text x="${w*.5}" y="${h*.98}" font-family="Georgia,serif" font-size="${(w*.063).toFixed(1)}" fill="#ecdaaa" text-anchor="middle">LANGUAGE</text></svg>`;}
   },
   {
-    id:7, ix:870,  iy:338,
+    id:7, ix:1040,  iy:515,
     title:"The Weight of Things", tag:"Material & Memory",
     tagBg:"#dde0d8", tagFg:"#3a4a30",
     desc:"Objects remember what we forget. This project examines how everyday things carry emotional weight — and what AI can learn from the material texture of daily life.",
@@ -596,7 +602,7 @@ const PROJECTS = [
       <text x="${w*.5}" y="${h*.98}" font-family="Georgia,serif" font-size="${(w*.063).toFixed(1)}" fill="#d4dcc0" text-anchor="middle">OF THINGS</text></svg>`;}
   },
   {
-    id:8, ix:1040, iy:260,
+    id:8, ix:975,  iy:405,
     title:"Night Taxonomy", tag:"Classification & Knowledge",
     tagBg:"#e2e0f2", tagFg:"#38306a",
     desc:"Some things resist naming. This project builds classification systems for experiences that fall outside existing categories — the unnamed feelings, the in-between states.",
@@ -628,7 +634,7 @@ const PROJECTS = [
       <text x="${w*.5}" y="${h*.98}" font-family="Georgia,serif" font-size="${(w*.063).toFixed(1)}" fill="#c0c0e8" text-anchor="middle">TAXONOMY</text></svg>`;}
   },
   {
-    id:9, ix:1116, iy:174,
+    id:9, ix:855,  iy:325,
     title:"Fog of Origins", tag:"Migration & Belonging",
     tagBg:"#dce8e4", tagFg:"#2a5248",
     desc:"Where we come from shapes what we become. This project traces the routes of migration, displacement, and return — mapping belonging as a living, shifting terrain.",
@@ -653,7 +659,7 @@ const PROJECTS = [
       <text x="${w*.5}" y="${h*.98}" font-family="Georgia,serif" font-size="${(w*.063).toFixed(1)}" fill="#c8dcd4" text-anchor="middle">ORIGINS</text></svg>`;}
   },
   {
-    id:10, ix:1284, iy:96,
+    id:10, ix:695,  iy:255,
     title:"The Becoming", tag:"Process & Transformation",
     tagBg:"#f2e8d4", tagFg:"#6a4818",
     desc:"Growth is not a destination. This project studies processes of transformation across biology, culture, and code — the patterns that repeat across every scale of becoming.",
@@ -671,6 +677,104 @@ const PROJECTS = [
       <rect x="0" y="${h*.84}" width="${w}" height="${h*.16}" fill="#5a3808" opacity="0.90"/>
       <text x="${w*.5}" y="${h*.91}" font-family="Georgia,serif" font-size="${(w*.063).toFixed(1)}" fill="#f0e0a8" text-anchor="middle">THE</text>
       <text x="${w*.5}" y="${h*.98}" font-family="Georgia,serif" font-size="${(w*.063).toFixed(1)}" fill="#f0e0a8" text-anchor="middle">BECOMING</text></svg>`;}
+  },
+  {
+    id:11, ix:515,  iy:195,
+    title:"Cartography of Silence", tag:"Maps & Absence",
+    tagBg:"#dde4f0", tagFg:"#2a3870",
+    desc:"Some territories refuse to be named. This project maps the unmappable — absences, erasures, and silences in historical records — as a form of counter-cartography.",
+    body:"Empty grids. Blank coordinates. The map that shows what was removed from the map.",
+    makeCover(w,h){return`<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="c11" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2a3870"/><stop offset="100%" stop-color="#10163a"/></linearGradient></defs>
+      <rect width="${w}" height="${h}" fill="url(#c11)"/>
+      ${Array.from({length:8},(_,i)=>`<line x1="0" y1="${h*(0.15+i*0.09)}" x2="${w}" y2="${h*(0.15+i*0.09)}" stroke="#5868a0" stroke-width="0.7" opacity="0.35"/>`).join('')}
+      ${Array.from({length:6},(_,i)=>`<line x1="${w*(0.1+i*0.16)}" y1="${h*.1}" x2="${w*(0.1+i*0.16)}" y2="${h*.82}" stroke="#5868a0" stroke-width="0.7" opacity="0.35"/>`).join('')}
+      <rect x="${w*.22}" y="${h*.22}" width="${w*.56}" height="${h*.40}" fill="#090d20" opacity="0.88"/>
+      <rect x="${w*.22}" y="${h*.22}" width="${w*.56}" height="${h*.40}" fill="none" stroke="#5868a0" stroke-width="1" opacity="0.50"/>
+      <rect x="0" y="${h*.84}" width="${w}" height="${h*.16}" fill="#090d20" opacity="0.94"/>
+      <text x="${w*.5}" y="${h*.91}" font-family="Georgia,serif" font-size="${(w*.055).toFixed(1)}" fill="#8898c8" text-anchor="middle">CARTOGRAPHY</text>
+      <text x="${w*.5}" y="${h*.98}" font-family="Georgia,serif" font-size="${(w*.055).toFixed(1)}" fill="#8898c8" text-anchor="middle">OF SILENCE</text></svg>`;}
+  },
+  {
+    id:12, ix:350,  iy:150,
+    title:"Borrowed Light", tag:"Photography & Memory",
+    tagBg:"#f8f0d8", tagFg:"#6a5010",
+    desc:"Every photograph is an act of borrowing — a moment of light captured, never owned. This project studies the ethics of the photographic archive and what it means to hold someone else's image.",
+    body:"Light does not belong to the one who catches it. It passes through.",
+    makeCover(w,h){return`<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="c12" cx="50%" cy="34%" r="55%"><stop offset="0%" stop-color="#e8c870"/><stop offset="100%" stop-color="#3a2808"/></radialGradient>
+        <radialGradient id="c12b" cx="50%" cy="34%" r="28%"><stop offset="0%" stop-color="#faf0c0" stop-opacity="0.82"/><stop offset="100%" stop-color="#faf0c0" stop-opacity="0"/></radialGradient>
+      </defs>
+      <rect width="${w}" height="${h}" fill="url(#c12)"/>
+      <rect width="${w}" height="${h}" fill="url(#c12b)"/>
+      <circle cx="${w*.5}" cy="${h*.33}" r="${w*.18}" fill="none" stroke="#f0d870" stroke-width="1.4" opacity="0.60"/>
+      <circle cx="${w*.5}" cy="${h*.33}" r="${w*.09}" fill="#faf0c0" opacity="0.72"/>
+      <line x1="${w*.5}" y1="${h*.33}" x2="${w*.5}" y2="${h*.60}" stroke="#c09010" stroke-width="1.5" opacity="0.52"/>
+      <line x1="${w*.5}" y1="${h*.33}" x2="${w*.26}" y2="${h*.57}" stroke="#c09010" stroke-width="1.2" opacity="0.42"/>
+      <line x1="${w*.5}" y1="${h*.33}" x2="${w*.74}" y2="${h*.57}" stroke="#c09010" stroke-width="1.2" opacity="0.42"/>
+      <rect x="0" y="${h*.84}" width="${w}" height="${h*.16}" fill="#2a1808" opacity="0.90"/>
+      <text x="${w*.5}" y="${h*.91}" font-family="Georgia,serif" font-size="${(w*.063).toFixed(1)}" fill="#e8c870" text-anchor="middle">BORROWED</text>
+      <text x="${w*.5}" y="${h*.98}" font-family="Georgia,serif" font-size="${(w*.063).toFixed(1)}" fill="#e8c870" text-anchor="middle">LIGHT</text></svg>`;}
+  },
+  {
+    id:13, ix:260,  iy:100,
+    title:"The Unfinished", tag:"Process & Incompleteness",
+    tagBg:"#f4ede4", tagFg:"#5a3820",
+    desc:"What does it mean to leave something incomplete? This project collects abandoned works — sketches, drafts, half-built structures — and asks what the unfinished reveals that the finished hides.",
+    body:"A sketch contains the whole idea. The finished painting often loses it.",
+    makeCover(w,h){return`<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="c13" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#c8a880"/><stop offset="100%" stop-color="#5a3820"/></linearGradient></defs>
+      <rect width="${w}" height="${h}" fill="url(#c13)"/>
+      <path d="M ${w*.2},${h*.72} L ${w*.2},${h*.24} L ${w*.8},${h*.24}" stroke="#e8d4a8" stroke-width="2" fill="none" opacity="0.75" stroke-linecap="round"/>
+      <path d="M ${w*.2},${h*.50} L ${w*.65},${h*.50}" stroke="#e8d4a8" stroke-width="1.4" fill="none" opacity="0.52" stroke-dasharray="5,4" stroke-linecap="round"/>
+      <path d="M ${w*.36},${h*.24} L ${w*.36},${h*.56}" stroke="#e8d4a8" stroke-width="1.4" fill="none" opacity="0.52" stroke-dasharray="5,4" stroke-linecap="round"/>
+      <circle cx="${w*.52}" cy="${h*.42}" r="${w*.07}" fill="none" stroke="#e8d4a8" stroke-width="1.4" opacity="0.62"/>
+      <path d="M ${w*.65},${h*.50} L ${w*.72},${h*.36}" stroke="#e8d4a8" stroke-width="1.2" fill="none" opacity="0.36" stroke-dasharray="3,5" stroke-linecap="round"/>
+      <rect x="0" y="${h*.84}" width="${w}" height="${h*.16}" fill="#3a2010" opacity="0.90"/>
+      <text x="${w*.5}" y="${h*.91}" font-family="Georgia,serif" font-size="${(w*.063).toFixed(1)}" fill="#e8d4a8" text-anchor="middle">THE</text>
+      <text x="${w*.5}" y="${h*.98}" font-family="Georgia,serif" font-size="${(w*.063).toFixed(1)}" fill="#e8d4a8" text-anchor="middle">UNFINISHED</text></svg>`;}
+  },
+  {
+    id:14, ix:385,  iy:52,
+    title:"After Language", tag:"Translation & Loss",
+    tagBg:"#f0e4ec", tagFg:"#601838",
+    desc:"Something always survives translation. Something always dies. This project maps the losses and unexpected gains when meaning crosses from one language to another.",
+    body:"Between any two languages there is a country no one has named.",
+    makeCover(w,h){return`<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="c14" x1="0.3" y1="0" x2="0.7" y2="1"><stop offset="0%" stop-color="#901848"/><stop offset="100%" stop-color="#380818"/></linearGradient></defs>
+      <rect width="${w}" height="${h}" fill="url(#c14)"/>
+      <text x="${w*.28}" y="${h*.28}" font-family="Georgia,serif" font-size="${(w*.11).toFixed(1)}" fill="#e8a0b0" opacity="0.72" text-anchor="middle">あ</text>
+      <text x="${w*.72}" y="${h*.28}" font-family="Georgia,serif" font-size="${(w*.10).toFixed(1)}" fill="#e8a0b0" opacity="0.65" text-anchor="middle">ب</text>
+      <text x="${w*.5}"  y="${h*.52}" font-family="Georgia,serif" font-size="${(w*.09).toFixed(1)}" fill="#f0c0cc" opacity="0.80" text-anchor="middle">λ</text>
+      <text x="${w*.25}" y="${h*.60}" font-family="Georgia,serif" font-size="${(w*.08).toFixed(1)}" fill="#e8a0b0" opacity="0.55" text-anchor="middle">字</text>
+      <text x="${w*.76}" y="${h*.60}" font-family="Georgia,serif" font-size="${(w*.08).toFixed(1)}" fill="#e8a0b0" opacity="0.50" text-anchor="middle">Ω</text>
+      <line x1="${w*.15}" y1="${h*.66}" x2="${w*.85}" y2="${h*.66}" stroke="#c06080" stroke-width="0.8" opacity="0.44"/>
+      <rect x="0" y="${h*.84}" width="${w}" height="${h*.16}" fill="#280810" opacity="0.90"/>
+      <text x="${w*.5}" y="${h*.91}" font-family="Georgia,serif" font-size="${(w*.063).toFixed(1)}" fill="#f0b0c0" text-anchor="middle">AFTER</text>
+      <text x="${w*.5}" y="${h*.98}" font-family="Georgia,serif" font-size="${(w*.063).toFixed(1)}" fill="#f0b0c0" text-anchor="middle">LANGUAGE</text></svg>`;}
+  },
+  {
+    id:15, ix:620,  iy:28,
+    title:"Threshold Studies", tag:"Transition & Liminality",
+    tagBg:"#e4eff4", tagFg:"#1a4858",
+    desc:"Thresholds are the most honest places — moments between states, neither in nor out. This project studies transitions: architectural, ecological, and emotional.",
+    body:"The door frame is the most interesting part of any room.",
+    makeCover(w,h){return`<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="c15a" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#88b8d0"/><stop offset="100%" stop-color="#1a3848"/></linearGradient>
+        <linearGradient id="c15b" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#d8f0f8" stop-opacity="0.60"/><stop offset="100%" stop-color="#d8f0f8" stop-opacity="0"/></linearGradient>
+      </defs>
+      <rect width="${w}" height="${h}" fill="url(#c15a)"/>
+      <rect width="${w}" height="${h*.55}" fill="url(#c15b)"/>
+      <rect x="${w*.30}" y="${h*.18}" width="${w*.40}" height="${h*.56}" fill="#0e2030" opacity="0.85" rx="1"/>
+      <rect x="${w*.30}" y="${h*.18}" width="${w*.40}" height="${h*.56}" fill="none" stroke="#6aaccc" stroke-width="1.5" opacity="0.70" rx="1"/>
+      <line x1="${w*.5}"  y1="${h*.18}" x2="${w*.5}"  y2="${h*.06}" stroke="#6aaccc" stroke-width="1.2" opacity="0.55"/>
+      <circle cx="${w*.5}" cy="${h*.06}" r="${w*.055}" fill="none" stroke="#6aaccc" stroke-width="1" opacity="0.50"/>
+      <line x1="${w*.30}" y1="${h*.60}" x2="${w*.70}" y2="${h*.60}" stroke="#6aaccc" stroke-width="1" opacity="0.45"/>
+      <rect x="0" y="${h*.84}" width="${w}" height="${h*.16}" fill="#0a1820" opacity="0.92"/>
+      <text x="${w*.5}" y="${h*.91}" font-family="Georgia,serif" font-size="${(w*.055).toFixed(1)}" fill="#88c8e0" text-anchor="middle">THRESHOLD</text>
+      <text x="${w*.5}" y="${h*.98}" font-family="Georgia,serif" font-size="${(w*.055).toFixed(1)}" fill="#88c8e0" text-anchor="middle">STUDIES</text></svg>`;}
   }
 ];
 
@@ -708,12 +812,12 @@ function buildRiver(allPts) {
   const N = PROJECTS.length;
   const fullD = spline(allPts);
 
-  /* Base washes — full path */
-  layer.appendChild(path(spline(oshift(allPts,-7,-6)),  { stroke:'#7896b6','stroke-width':16, opacity:0.16 }));
-  layer.appendChild(path(fullD,                          { stroke:'#88acc8','stroke-width':22, opacity:0.18 }));
-  layer.appendChild(path(spline(oshift(allPts,9,7)),     { stroke:'#92b6d0','stroke-width':14, opacity:0.14 }));
+  /* Base washes — lighter, ink-wash feel */
+  layer.appendChild(path(spline(oshift(allPts,-7,-6)),  { stroke:'#7896b6','stroke-width':10, opacity:0.07 }));
+  layer.appendChild(path(fullD,                          { stroke:'#88acc8','stroke-width':16, opacity:0.09 }));
+  layer.appendChild(path(spline(oshift(allPts,9,7)),     { stroke:'#92b6d0','stroke-width': 8, opacity:0.06 }));
   /* Lavender bleed */
-  layer.appendChild(path(spline(oshift(allPts,-12,-10)), { stroke:'#a6a0ce','stroke-width':40, opacity:0.07 }));
+  layer.appendChild(path(spline(oshift(allPts,-12,-10)), { stroke:'#a6a0ce','stroke-width':22, opacity:0.04 }));
 
   /* Stacked tapering segments — widen toward destination */
   PROJECTS.forEach((proj, i) => {
@@ -722,8 +826,8 @@ function buildRiver(allPts) {
       ...PROJECTS.slice(i+1).map(q=>({x:q.ix,y:q.iy})),
       DEST
     ];
-    const w1 = (N-i)*26+18, w2 = w1*0.60;
-    const op1 = 0.065+(N-i)*0.007, op2 = op1+0.026;
+    const w1 = (N-i)*9+5,   w2 = w1*0.55;
+    const op1 = 0.020+(N-i)*0.003, op2 = op1+0.010;
     const d = spline(segPts);
     layer.appendChild(path(d, { stroke:'#6898b8','stroke-width':w1, opacity:op1 }));
     layer.appendChild(path(d, { stroke:'#80aac8','stroke-width':w2, opacity:op2 }));
@@ -755,6 +859,85 @@ function buildRiver(allPts) {
   });
 }
 
+/* ── Build mountains (Shanshui + Inuit) ────────────── */
+function buildMountains() {
+  const layer = document.getElementById('mountain-layer');
+  function fp(d, fill, opacity, filt) {
+    const el = document.createElementNS(SVG_NS, 'path');
+    el.setAttribute('d', d); el.setAttribute('fill', fill);
+    el.setAttribute('stroke', 'none'); el.setAttribute('opacity', String(opacity));
+    if (filt) el.setAttribute('filter', filt);
+    return el;
+  }
+  function fstroke(d, stroke, sw, opacity) {
+    const el = document.createElementNS(SVG_NS, 'path');
+    el.setAttribute('d', d); el.setAttribute('fill', 'none');
+    el.setAttribute('stroke', stroke); el.setAttribute('stroke-width', String(sw));
+    el.setAttribute('opacity', String(opacity)); el.setAttribute('stroke-linecap', 'round');
+    return el;
+  }
+
+  /* ── Far sky-haze sweep ───────────────────────── */
+  layer.appendChild(fp(
+    'M 0,0 L 1400,0 L 1400,440 C 1250,380 1050,310 820,295 C 590,280 380,315 200,300 C 80,290 0,340 0,380 Z',
+    '#cdd2de', 0.20, 'url(#blur-xl)'));
+
+  /* ── Far mountains — left (Shanshui angular peaks) */
+  layer.appendChild(fp(
+    'M -50,780 L 55,540 L 105,568 L 155,468 L 215,380 L 268,415 L 315,335 L 385,272 L 440,308 L 492,385 L 548,462 L 618,545 L 680,630 Z',
+    '#9aaabb', 0.30, 'url(#blur-lg)'));
+
+  /* ── Far mountains — right (Shanshui) */
+  layer.appendChild(fp(
+    'M 880,900 L 975,660 L 1020,688 L 1075,588 L 1140,508 L 1198,542 L 1258,462 L 1330,502 L 1400,560 L 1400,900 Z',
+    '#9aaabb', 0.26, 'url(#blur-lg)'));
+
+  /* ── Center background — faint distant range */
+  layer.appendChild(fp(
+    'M 380,700 C 460,480 555,385 672,355 C 789,325 910,385 1010,510 L 1010,700 Z',
+    '#a6b2c4', 0.18, 'url(#blur-xl)'));
+
+  /* ── Near mountains — left (Shanshui layered + Inuit dome mix) */
+  layer.appendChild(fp(
+    'M -50,820 L 48,608 L 92,635 L 135,545 L 185,462 L 236,498 L 278,418 L 338,358 L 388,396 L 432,468 L 485,548 L 538,625 Z',
+    '#506878', 0.46, 'url(#blur-md)'));
+  /* Inuit broad dome — left */
+  layer.appendChild(fp('M 30,820 Q 195,405 360,820 Z', '#3e5260', 0.34, 'url(#blur-sm)'));
+  layer.appendChild(fp('M 75,820 Q 225,455 375,820 Z', '#485e6e', 0.24, 'url(#blur-sm)'));
+
+  /* ── Near mountains — right */
+  layer.appendChild(fp(
+    'M 1060,900 L 1130,700 L 1170,725 L 1225,635 L 1285,568 L 1342,598 L 1400,648 L 1400,900 Z',
+    '#4a5a68', 0.44, 'url(#blur-md)'));
+  /* Inuit dome — right */
+  layer.appendChild(fp('M 1040,900 Q 1175,528 1310,900 Z', '#3a4858', 0.32, 'url(#blur-sm)'));
+
+  /* ── Ink texture strokes (Shanshui horizontal brush marks) */
+  [
+    'M 118,505 Q 162,515 205,503', 'M 155,538 Q 204,549 250,536',
+    'M 192,570 Q 246,582 295,568', 'M 238,602 Q 295,614 345,599',
+    'M 142,472 Q 180,481 218,471',
+    'M 1148,648 Q 1192,658 1236,646', 'M 1170,678 Q 1218,690 1265,676',
+    'M 1194,708 Q 1246,720 1296,705',
+  ].forEach(d => layer.appendChild(fstroke(d, '#263440', 1.1, 0.26)));
+
+  /* ── Mist bands between layers */
+  [{cx:320,cy:415,rx:310,ry:26},{cx:1120,cy:572,rx:265,ry:20},{cx:680,cy:318,rx:340,ry:22}]
+  .forEach(m => layer.appendChild(mk('ellipse',{
+    cx:m.cx,cy:m.cy,rx:m.rx,ry:m.ry,fill:'#dce0ea',opacity:0.30,filter:'url(#blur-xl)'
+  })));
+
+  /* ── Pine tree silhouettes (Shanshui accent) */
+  [{x:295,y:388,h:32},{x:318,y:396,h:26},{x:342,y:382,h:30},{x:175,y:450,h:28},{x:198,y:442,h:24}]
+  .forEach(({x,y,h}) => {
+    layer.appendChild(fstroke(`M ${x},${y} L ${x},${y-h}`, '#1e2c36', 1.2, 0.52));
+    [0.28,0.54,0.78].forEach(f => {
+      const by=y-h*f, sp=(h*0.38)*(1-f*0.55);
+      layer.appendChild(fstroke(`M ${x},${by} L ${x-sp},${by+5} M ${x},${by} L ${x+sp},${by+5}`, '#1e2c36', 1.0, 0.46));
+    });
+  });
+}
+
 /* ── Build natural elements ─────────────────────────── */
 function buildNature(allPts) {
   const layer = document.getElementById('nature-layer');
@@ -763,16 +946,16 @@ function buildNature(allPts) {
   for (let i = 0; i < allPts.length - 1; i++) {
     const p1 = allPts[i], p2 = allPts[i+1];
     const mx = (p1.x+p2.x)/2, my = (p1.y+p2.y)/2;
-    const bankDist = 48 + i * 8; /* grows as river widens */
+    const bankDist = 32 + i * 4;
+    /* Local perpendicular to this river segment */
+    const rdx = p2.x-p1.x, rdy = p2.y-p1.y;
+    const rlen = Math.sqrt(rdx*rdx+rdy*rdy) || 1;
+    const lv = [-rdy/rlen,  rdx/rlen];
+    const rv = [ rdy/rlen, -rdx/rlen];
 
-    /* Upper-left bank (reeds + water sedge) */
-    const ux = mx + LX*bankDist, uy = my + LY*bankDist;
-    placeReeds(layer, ux, uy, i);
-
-    /* Lower-right bank (iris-blue marks + pebbles) */
-    const lx = mx + RX*bankDist, ly = my + RY*bankDist;
-    placeIris(layer, lx, ly, i);
-    placeBankPebbles(layer, lx - RX*18, ly - RY*18, i);
+    placeReeds(layer, mx+lv[0]*bankDist, my+lv[1]*bankDist, i);
+    placeIris(layer,  mx+rv[0]*bankDist, my+rv[1]*bankDist, i);
+    placeBankPebbles(layer, mx+rv[0]*(bankDist-14), my+rv[1]*(bankDist-14), i);
   }
 
   /* Ripples and shadow around each island */
@@ -926,7 +1109,12 @@ function makeBack(id, w, h) {
     {e1:[.44,.56],e2:[.58,.38],lx:[.14,.84],ly:[.71,.65]},
     {e1:[.52,.40],e2:[.48,.60],lx:[.16,.82],ly:[.74,.68]},
     {e1:[.32,.46],e2:[.66,.58],lx:[.15,.80],ly:[.73,.67]},
-  ][id-1];
+    {e1:[.42,.38],e2:[.58,.64],lx:[.14,.84],ly:[.72,.68]},
+    {e1:[.54,.32],e2:[.46,.66],lx:[.16,.81],ly:[.75,.71]},
+    {e1:[.26,.44],e2:[.72,.56],lx:[.15,.83],ly:[.73,.69]},
+    {e1:[.58,.30],e2:[.42,.68],lx:[.17,.80],ly:[.74,.70]},
+    {e1:[.38,.52],e2:[.62,.40],lx:[.13,.85],ly:[.71,.67]},
+  ][(id-1) % 15];
   return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
     <rect width="${w}" height="${h}" fill="#9aaebe"/>
     <ellipse cx="${s(w*v.e1[0])}" cy="${s(h*v.e1[1])}" rx="${s(w*.72)}" ry="${s(h*.66)}" fill="#aec0d0" opacity="0.44"/>
@@ -1103,6 +1291,7 @@ document.getElementById('modal-overlay').addEventListener('click', e => {
 
 /* ── Init ───────────────────────────────────────────── */
 const allPts = [SRC, ...PROJECTS.map(p=>({x:p.ix,y:p.iy})), DEST];
+buildMountains();
 buildRiver(allPts);
 buildNature(allPts);
 buildIslands();
